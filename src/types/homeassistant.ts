@@ -63,9 +63,11 @@ export interface Hass {
   states: Record<string, HassEntity>;
   callService: (domain: string, service: string, data?: Record<string, unknown>) => Promise<void>;
   hassUrl: (path: string) => string;
+  /** Authenticated fetch — passes HA auth token automatically */
+  fetchWithAuth: (url: string, init?: RequestInit) => Promise<Response>;
 }
 
-export type CleaningMode = 'room' | 'all' | 'zone';
+export type CleaningMode = 'room' | 'all' | 'zone' | 'restrictions';
 export type CleaningStrategy = 'CleanGenius' | 'Custom';
 export type RoomViewMode = 'map' | 'list';
 

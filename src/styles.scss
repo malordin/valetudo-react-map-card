@@ -23,3 +23,9 @@
 @use './components/SettingsPanel/sections/VolumeSection.scss';
 @use './components/SettingsPanel/SettingsPanel.scss';
 @use './components/DreameVacuumCard/DreameVacuumCard.scss';
+
+// Valetudo card components
+@use './components/ValetudoVacuumCard/ValetudoVacuumCard.scss';
+@use './components/ValetudoMapCanvas/ValetudoMapCanvas.scss';
+@use './components/ValetudoSpeedPanel/ValetudoSpeedPanel.scss';
+@use './components/ValetudoSettingsPanel/ValetudoSettingsPanel.scss';

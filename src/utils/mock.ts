@@ -52,6 +52,11 @@ export function createMockHass(): Hass {
       return `${devConfig.mockServerUrl}${path}`;
     },
 
+    fetchWithAuth: async (url: string) => {
+      console.log('[Mock Hass] fetchWithAuth:', url);
+      return new Response(new Uint8Array(0), { status: 404 });
+    },
+
     callService: async (domain: string, service: string, serviceData?: Record<string, unknown>) => {
       console.log('[Mock Hass] Service called:', {
         domain,

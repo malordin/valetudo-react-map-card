@@ -1,0 +1,48 @@
+.valetudo-vacuum-card {
+  &__error {
+    padding: 1.25rem;
+    color: var(--error-color, #ff3b30);
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  &__warning {
+    padding: 0.5rem 1.25rem;
+    background: var(--warning-bg, #fff3cd);
+    color: var(--warning-color, #856404);
+    font-size: 0.75rem;
+    border-radius: 0 0 1.25rem 1.25rem;
+  }
+
+  &__map-placeholder {
+    margin: 0 1.25rem;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-secondary, #e8e8e8);
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #666);
+  }
+}
+
+.valetudo-selected-rooms {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0 0 0.25rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+
+  &__label {
+    font-weight: 600;
+    color: var(--text-secondary, #888);
+    white-space: nowrap;
+  }
+
+  &__names {
+    color: var(--accent-color, #007aff);
+    font-weight: 500;
+  }
+}

@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { DreameVacuumCard } from './components/DreameVacuumCard';
+import { ValetudoVacuumCard } from './components/ValetudoVacuumCard/ValetudoVacuumCard';
 import type { Hass, HassConfig } from './types/homeassistant';
+import type { ValetudoHassConfig } from './types/valetudo';
 import { createMockHass } from './utils/mock';
 import { isDevelopment, devConfig } from './config/env';
 import { attachDevUtils } from './utils/devUtils';
@@ -95,7 +97,9 @@ class DreameVacuumMapCard extends HTMLElement {
   }
 }
 
-customElements.define('dreame-vacuum-map-card', DreameVacuumMapCard);
+if (!customElements.get('dreame-vacuum-map-card')) {
+  customElements.define('dreame-vacuum-map-card', DreameVacuumMapCard);
+}
 
 declare global {
   interface Window {
@@ -117,5 +121,87 @@ if (window.customCards) {
 }
 
 console.info('Dreame Vacuum Map Card (React) loaded');
+
+// ─── Valetudo Vacuum Map Card ─────────────────────────────────────────────────
+
+class ValetudoVacuumMapCard extends HTMLElement {
+  private _root: ReactDOM.Root | null = null;
+  private _hass?: Hass;
+  private _config?: ValetudoHassConfig;
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+
+    const styleEl = document.createElement('style');
+    styleEl.textContent = styles;
+    this.shadowRoot!.appendChild(styleEl);
+  }
+
+  setConfig(config: ValetudoHassConfig) {
+    if (!config.entity) {
+      throw new Error('valetudo-vacuum-map-card: you need to define an entity (vacuum.*)');
+    }
+    this._config = config;
+    this.render();
+  }
+
+  set hass(hass: Hass) {
+    this._hass = hass;
+    this.render();
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  disconnectedCallback() {
+    if (this._root) {
+      this._root.unmount();
+      this._root = null;
+    }
+  }
+
+  private render() {
+    if (!this._hass || !this._config || !this.shadowRoot) return;
+
+    let container = this.shadowRoot.querySelector('#react-root') as HTMLElement;
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'react-root';
+      this.shadowRoot.appendChild(container);
+    }
+
+    if (!this._root) {
+      this._root = ReactDOM.createRoot(container);
+    }
+
+    this._root.render(
+      <React.StrictMode>
+        <ValetudoVacuumCard hass={this._hass} config={this._config} />
+      </React.StrictMode>
+    );
+  }
+
+  getCardSize() {
+    return 5;
+  }
+
+  static getStubConfig() {
+    return {
+      type: 'custom:valetudo-vacuum-map-card',
+      entity: 'vacuum.valetudo_yourrobot',
+    };
+  }
+}
+
+customElements.define('valetudo-vacuum-map-card', ValetudoVacuumMapCard);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: 'valetudo-vacuum-map-card',
+  name: 'Valetudo Vacuum Map Card',
+  description: 'Beautiful map card for Valetudo-flashed vacuum cleaners',
+});
 
 export default DreameVacuumMapCard;

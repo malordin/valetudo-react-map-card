@@ -10,7 +10,7 @@ interface ActionButtonsProps {
   isRunning: boolean;
   isPaused: boolean;
   isDocked: boolean;
-  onClean: () => void;
+  onClean?: () => void;
   onPause: () => void;
   onResume: () => void;
   onStop: () => void;

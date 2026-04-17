@@ -1,0 +1,65 @@
+.valetudo-speed-panel {
+  padding: 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.valetudo-speed-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0 0.125rem;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--surface-tertiary, #e8e8e8);
+    border-radius: 0.9375rem;
+    padding: 0.25rem;
+  }
+
+  &__tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 0.6875rem;
+    padding: 0.5rem 0.25rem;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: transparent;
+    color: var(--text-secondary, #666);
+    text-transform: capitalize;
+    white-space: nowrap;
+
+    &--active {
+      background-color: var(--surface-bg, white);
+      color: var(--text-primary, #000);
+      box-shadow: 0 0.125rem 0.25rem var(--card-shadow, rgba(0, 0, 0, 0.1));
+    }
+
+    &:hover:not(&--active):not(:disabled) {
+      background-color: var(--surface-bg-hover, rgba(255, 255, 255, 0.5));
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}

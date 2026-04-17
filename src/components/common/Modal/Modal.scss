@@ -9,7 +9,9 @@
   padding: 0 1.25rem 1.25rem;
   z-index: 1000;
   max-height: 80vh;
-  overflow-y: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   color: var(--text-primary, black);
 
   &::-webkit-scrollbar {
