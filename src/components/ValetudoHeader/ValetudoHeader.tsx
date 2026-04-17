@@ -83,7 +83,7 @@ export function ValetudoHeader({
         )}
         <div className="header__title-wrapper">
           <h2 className="header__title">
-            {deviceName} <span style={{ fontSize: '0.6em', opacity: 0.45, fontWeight: 400 }}>v1.1.4</span>
+            {deviceName} <span style={{ fontSize: '0.6em', opacity: 0.45, fontWeight: 400 }}>{__APP_VERSION__}</span>
           </h2>
           <p className="header__status">{statusText}</p>
         </div>
