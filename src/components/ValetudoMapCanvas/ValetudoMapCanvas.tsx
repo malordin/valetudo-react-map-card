@@ -880,7 +880,11 @@ export function ValetudoMapCanvas({
       </div>
 
       {/* Bottom-right controls: iterations + zoom */}
-      <div className="valetudo-map-canvas__bottom-controls">
+      <div
+        className="valetudo-map-canvas__bottom-controls"
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
+      >
         {onIterationsChange && (
           <button
             type="button"
