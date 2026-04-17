@@ -55,12 +55,19 @@ export function CleaningModeModal({ opened, onClose, entity, hass, language }: C
     { value: UI_MODE_TYPE.CUSTOM, label: t('cleaning_mode.custom') },
   ];
 
-  const cleaningModeList = getStringArrayAttr('cleaning_mode_list', [
-    'Sweeping',
-    'Mopping',
-    'Sweeping and mopping',
-    'Mopping after sweeping',
-  ]);
+  const cleaningModeList = (() => {
+    const list = getStringArrayAttr('cleaning_mode_list', [
+      'Sweeping',
+      'Mopping',
+      'Sweeping and mopping',
+      'Mopping after sweeping',
+    ]);
+    // Always include Mapping mode even if device doesn't report it
+    if (!list.includes('Mapping')) {
+      return [...list, 'Mapping'];
+    }
+    return list;
+  })();
 
   const cleangeniusModeList = getStringArrayAttr('cleangenius_mode_list', ['Vacuum and mop', 'Mop after vacuum']);
 

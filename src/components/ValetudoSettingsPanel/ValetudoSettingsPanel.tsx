@@ -222,12 +222,13 @@ export function ValetudoSettingsPanel({
                     <span className="valetudo-settings-section__value">{item!.value}</span>
                   </div>
                 ))}
-              {valetudoUrl && (
+              {/* Valetudo UI link — uses configured URL or auto-derives from robot IP */}
+              {(valetudoUrl || (wifiIp && wifiIp !== '—')) && (
                 <div className="valetudo-settings-section__row valetudo-settings-section__row--link">
                   <span className="valetudo-settings-section__label">{t('valetudo.panel.valetudo_ui')}</span>
                   <a
                     className="valetudo-settings-section__link"
-                    href={valetudoUrl}
+                    href={valetudoUrl || `http://${wifiIp}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
