@@ -9,4 +9,5 @@ export { useVacuumServices } from './useVacuumServices';
 export { useToast } from './useToast';
 export { useTranslation } from './useTranslation';
 export { useTheme } from './useTheme';
+export { useRestrictions, buildRestrictionsPayload } from './useRestrictions';
 export type { VacuumEntityIds } from './useVacuumEntityIds';

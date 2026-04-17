@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { RawMapData, RawMapLayer } from '../../utils/ValetudoRawMapData';
 import type { CleaningMode, Zone } from '../../types/homeassistant';
+import type { RestrictionsState, VirtualWall, RestrictedZone } from '../../types/valetudo';
 import './ValetudoMapCanvas.scss';
 
 // Segment color palette (4-color theorem friendly)
@@ -76,6 +77,10 @@ interface ValetudoMapCanvasProps {
   zone?: Zone | null;
   onZoneChange?: (zone: Zone | null) => void;
   onSegmentClick?: (segmentId: number) => void;
+  // Restrictions editing
+  restrictions?: RestrictionsState;
+  onRestrictionDrawn?: (type: 'wall' | 'zone', p1: { x: number; y: number }, p2: { x: number; y: number }) => void;
+  onRestrictionSelect?: (id: string | null) => void;
 }
 
 // Stored state for coordinate conversion (filled during render)
@@ -84,7 +89,7 @@ interface MapGeometry {
   pixelSize: number;
 }
 
-export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneChange, onSegmentClick }: ValetudoMapCanvasProps) {
+export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneChange, onSegmentClick, restrictions, onRestrictionDrawn, onRestrictionSelect }: ValetudoMapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const geoRef = useRef<MapGeometry>({ bb: { minX: 0, minY: 0 }, pixelSize: 50 });
@@ -376,6 +381,64 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
     }
   }, [mapData, selectedRooms, zone, mode, mmToCanvas, isTouchDevice]);
 
+  // ─── Draw restrictions editor overlay (pending walls/zones, selection) ─────
+  useEffect(() => {
+    if (mode !== 'restrictions' || !restrictions) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const { bb, pixelSize } = geoRef.current;
+    const toC = (mmX: number, mmY: number) => ({
+      x: (mmX / pixelSize - bb.minX) * SCALE,
+      y: (mmY / pixelSize - bb.minY) * SCALE,
+    });
+
+    const drawWall = (w: VirtualWall, selected: boolean) => {
+      const p1 = toC(w.pA.x, w.pA.y);
+      const p2 = toC(w.pB.x, w.pB.y);
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = selected ? '#ff9800' : 'rgba(244,67,54,1)';
+      ctx.lineWidth = selected ? SCALE * 3 : SCALE * 2;
+      ctx.setLineDash([]);
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+      for (const p of [p1, p2]) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, selected ? SCALE * 2.5 : SCALE * 1.5, 0, 2 * Math.PI);
+        ctx.fillStyle = selected ? '#ff9800' : 'rgba(244,67,54,0.9)';
+        ctx.fill();
+      }
+    };
+
+    const drawZone = (z: RestrictedZone, selected: boolean) => {
+      const pts = [z.pA, z.pB, z.pC, z.pD].map((p) => toC(p.x, p.y));
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.closePath();
+      const isMop = z.type === 'mop';
+      if (selected) {
+        ctx.fillStyle = 'rgba(255,152,0,0.25)';
+        ctx.strokeStyle = '#ff9800';
+      } else {
+        ctx.fillStyle = isMop ? 'rgba(33,150,243,0.2)' : 'rgba(244,67,54,0.2)';
+        ctx.strokeStyle = isMop ? 'rgba(33,150,243,0.9)' : 'rgba(244,67,54,0.9)';
+      }
+      ctx.fill();
+      ctx.lineWidth = selected ? SCALE * 2 : SCALE * 1.5;
+      ctx.setLineDash([5, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    };
+
+    for (const w of restrictions.walls) drawWall(w, w.id === restrictions.selectedId);
+    for (const z of restrictions.zones) drawZone(z, z.id === restrictions.selectedId);
+  }, [restrictions, mode]);
+
   // ─── Zoom: wheel ────────────────────────────────────────────────────────────
   useEffect(() => {
     const container = containerRef.current;
@@ -419,6 +482,19 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
       return;
     }
 
+    if (mode === 'restrictions' && restrictions && !isTouchDevice) {
+      const tool = restrictions.tool;
+      if (tool === 'wall' || tool === 'no_go' || tool === 'no_mop') {
+        isDragging.current = true;
+        const pt = screenToCanvas(e.clientX, e.clientY);
+        setDragStart(pt);
+        setDragCurrent(pt);
+        return;
+      }
+      // select tool — handled in click
+      return;
+    }
+
     if (zoom > 1) {
       // Pan
       isPanning.current = true;
@@ -443,6 +519,11 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
     lastPinchDist.current = null;
 
     if (isDragging.current && mode === 'zone' && !isTouchDevice) {
+      setDragCurrent(screenToCanvas(e.clientX, e.clientY));
+      return;
+    }
+
+    if (isDragging.current && mode === 'restrictions' && !isTouchDevice) {
       setDragCurrent(screenToCanvas(e.clientX, e.clientY));
       return;
     }
@@ -483,12 +564,66 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
       return;
     }
 
+    if (isDragging.current && mode === 'restrictions' && restrictions && !isTouchDevice) {
+      isDragging.current = false;
+      const end = screenToCanvas(e.clientX, e.clientY);
+      if (dragStart && (Math.abs(end.x - dragStart.x) > 5 || Math.abs(end.y - dragStart.y) > 5)) {
+        const mm1 = canvasToMm(dragStart.x, dragStart.y);
+        const mm2 = canvasToMm(end.x, end.y);
+        const p1 = { x: Math.round(mm1.x), y: Math.round(mm1.y) };
+        const p2 = { x: Math.round(mm2.x), y: Math.round(mm2.y) };
+        const drawType = restrictions.tool === 'wall' ? 'wall' : 'zone';
+        onRestrictionDrawn?.(drawType, p1, p2);
+      }
+      setDragStart(null);
+      setDragCurrent(null);
+      return;
+    }
+
     isPanning.current = false;
     lastPanPos.current = null;
-  }, [mode, isTouchDevice, dragStart, screenToCanvas, canvasToMm, onZoneChange]);
+  }, [mode, isTouchDevice, dragStart, screenToCanvas, canvasToMm, onZoneChange, restrictions, onRestrictionDrawn]);
 
-  // Room click
+  // Room click / restrictions select
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (mode === 'restrictions' && restrictions && restrictions.tool === 'select' && onRestrictionSelect) {
+      const pt = screenToCanvas(e.clientX, e.clientY);
+      const { bb, pixelSize } = geoRef.current;
+      const toC = (mmX: number, mmY: number) => ({
+        x: (mmX / pixelSize - bb.minX) * SCALE,
+        y: (mmY / pixelSize - bb.minY) * SCALE,
+      });
+      // Hit-test walls (within SCALE*4 px)
+      const HIT_PX = SCALE * 5;
+      for (const w of [...restrictions.walls].reverse()) {
+        const p1 = toC(w.pA.x, w.pA.y);
+        const p2 = toC(w.pB.x, w.pB.y);
+        const dx = p2.x - p1.x; const dy = p2.y - p1.y;
+        const len2 = dx * dx + dy * dy;
+        let t = len2 > 0 ? ((pt.x - p1.x) * dx + (pt.y - p1.y) * dy) / len2 : 0;
+        t = Math.max(0, Math.min(1, t));
+        const nearX = p1.x + t * dx; const nearY = p1.y + t * dy;
+        if (Math.hypot(pt.x - nearX, pt.y - nearY) <= HIT_PX) {
+          onRestrictionSelect(w.id);
+          return;
+        }
+      }
+      // Hit-test zones (point-in-rect)
+      for (const z of [...restrictions.zones].reverse()) {
+        const pts = [z.pA, z.pB, z.pC, z.pD].map((p) => toC(p.x, p.y));
+        const minX = Math.min(...pts.map((p) => p.x));
+        const maxX = Math.max(...pts.map((p) => p.x));
+        const minY = Math.min(...pts.map((p) => p.y));
+        const maxY = Math.max(...pts.map((p) => p.y));
+        if (pt.x >= minX - HIT_PX && pt.x <= maxX + HIT_PX && pt.y >= minY - HIT_PX && pt.y <= maxY + HIT_PX) {
+          onRestrictionSelect(z.id);
+          return;
+        }
+      }
+      onRestrictionSelect(null);
+      return;
+    }
+
     if (mode !== 'room' || !onSegmentClick) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -568,23 +703,39 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
 
   // ─── Desktop drag rect (% of canvas CSS area) ─────────────────────────────
   let dragRect: { left: string; top: string; width: string; height: string } | null = null;
+  let restrictionPreviewRect: { left: string; top: string; width: string; height: string } | null = null;
+  let restrictionPreviewLine: { x1: number; y1: number; x2: number; y2: number; cw: number; ch: number } | null = null;
   if (dragStart && dragCurrent && canvasRef.current) {
     const cw = canvasRef.current.width;
     const ch = canvasRef.current.height;
-    const x = Math.min(dragStart.x, dragCurrent.x) / cw * 100;
-    const y = Math.min(dragStart.y, dragCurrent.y) / ch * 100;
-    const w = Math.abs(dragCurrent.x - dragStart.x) / cw * 100;
-    const h = Math.abs(dragCurrent.y - dragStart.y) / ch * 100;
-    dragRect = { left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` };
+    if (mode === 'zone') {
+      const x = Math.min(dragStart.x, dragCurrent.x) / cw * 100;
+      const y = Math.min(dragStart.y, dragCurrent.y) / ch * 100;
+      const w = Math.abs(dragCurrent.x - dragStart.x) / cw * 100;
+      const h = Math.abs(dragCurrent.y - dragStart.y) / ch * 100;
+      dragRect = { left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` };
+    } else if (mode === 'restrictions' && restrictions) {
+      if (restrictions.tool === 'wall') {
+        restrictionPreviewLine = { x1: dragStart.x, y1: dragStart.y, x2: dragCurrent.x, y2: dragCurrent.y, cw, ch };
+      } else if (restrictions.tool === 'no_go' || restrictions.tool === 'no_mop') {
+        const x = Math.min(dragStart.x, dragCurrent.x) / cw * 100;
+        const y = Math.min(dragStart.y, dragCurrent.y) / ch * 100;
+        const w = Math.abs(dragCurrent.x - dragStart.x) / cw * 100;
+        const h = Math.abs(dragCurrent.y - dragStart.y) / ch * 100;
+        restrictionPreviewRect = { left: `${x}%`, top: `${y}%`, width: `${w}%`, height: `${h}%` };
+      }
+    }
   }
 
   const isZoneMode = mode === 'zone';
   const isRoomMode = mode === 'room' && !!onSegmentClick;
+  const isRestrictionsMode = mode === 'restrictions';
+  const restrictionsTool = restrictions?.tool ?? 'select';
 
   return (
     <div
       ref={containerRef}
-      className={`valetudo-map-canvas${isZoneMode ? ' valetudo-map-canvas--zone-mode' : ''}${isRoomMode ? ' valetudo-map-canvas--room-mode' : ''}`}
+      className={`valetudo-map-canvas${isZoneMode ? ' valetudo-map-canvas--zone-mode' : ''}${isRoomMode ? ' valetudo-map-canvas--room-mode' : ''}${isRestrictionsMode ? ` valetudo-map-canvas--restrictions-${restrictionsTool}` : ''}`}
       onClick={handleClick}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -600,6 +751,30 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
         {/* Desktop drag-to-draw zone */}
         {dragRect && (
           <div className="valetudo-map-canvas__zone-drag" style={dragRect} />
+        )}
+
+        {/* Restrictions draw preview */}
+        {restrictionPreviewRect && (
+          <div
+            className={`valetudo-map-canvas__restriction-preview valetudo-map-canvas__restriction-preview--${restrictions?.tool}`}
+            style={restrictionPreviewRect}
+          />
+        )}
+        {restrictionPreviewLine && (
+          <svg
+            className="valetudo-map-canvas__restriction-preview-svg"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}
+            viewBox={`0 0 ${restrictionPreviewLine.cw} ${restrictionPreviewLine.ch}`}
+            preserveAspectRatio="none"
+          >
+            <line
+              x1={restrictionPreviewLine.x1} y1={restrictionPreviewLine.y1}
+              x2={restrictionPreviewLine.x2} y2={restrictionPreviewLine.y2}
+              stroke="rgba(244,67,54,0.9)" strokeWidth={SCALE * 2} strokeLinecap="round"
+            />
+            <circle cx={restrictionPreviewLine.x1} cy={restrictionPreviewLine.y1} r={SCALE * 1.5} fill="rgba(244,67,54,0.9)" />
+            <circle cx={restrictionPreviewLine.x2} cy={restrictionPreviewLine.y2} r={SCALE * 1.5} fill="rgba(244,67,54,0.9)" />
+          </svg>
         )}
 
         {/* Mobile widget zone */}

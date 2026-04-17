@@ -113,6 +113,38 @@
     touch-action: none;
   }
 
+  &--restrictions-wall,
+  &--restrictions-no_go,
+  &--restrictions-no_mop {
+    cursor: crosshair;
+  }
+
+  &--restrictions-select {
+    cursor: pointer;
+  }
+
+  &__restriction-preview {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 2px;
+
+    &--no_go {
+      background: rgba(244, 67, 54, 0.18);
+      border: 2px dashed rgba(244, 67, 54, 0.85);
+    }
+
+    &--no_mop {
+      background: rgba(33, 150, 243, 0.18);
+      border: 2px dashed rgba(33, 150, 243, 0.85);
+    }
+  }
+
+  &__restriction-preview-svg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
   // ── Zoom controls ──────────────────────────────────────────────────────────
   &__zoom-controls {
     position: absolute;

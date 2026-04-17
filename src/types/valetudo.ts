@@ -68,6 +68,33 @@ export interface ValetudoEntityIds {
   carpetMode: string;
 }
 
+// ─── Virtual Restrictions ─────────────────────────────────────────────────────
+
+export interface VirtualWall {
+  id: string; // local UUID for editing
+  pA: { x: number; y: number };
+  pB: { x: number; y: number };
+}
+
+export interface RestrictedZone {
+  id: string; // local UUID for editing
+  type: 'regular' | 'mop';
+  pA: { x: number; y: number };
+  pB: { x: number; y: number };
+  pC: { x: number; y: number };
+  pD: { x: number; y: number };
+}
+
+export type RestrictionTool = 'wall' | 'no_go' | 'no_mop' | 'select';
+
+export interface RestrictionsState {
+  walls: VirtualWall[];
+  zones: RestrictedZone[];
+  selectedId: string | null;
+  tool: RestrictionTool;
+  dirty: boolean; // unsaved changes
+}
+
 /** Derives all Valetudo entity IDs from the vacuum entity ID */
 export function deriveValetudoEntityIds(config: ValetudoHassConfig): ValetudoEntityIds {
   const robotId = config.entity.replace(/^vacuum\./, '');

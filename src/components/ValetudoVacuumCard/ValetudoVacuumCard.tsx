@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { ValetudoHeader } from '../ValetudoHeader/ValetudoHeader';
 import { ValetudoMapCanvas } from '../ValetudoMapCanvas/ValetudoMapCanvas';
 import { ValetudoCleaningModal } from '../ValetudoCleaningModal/ValetudoCleaningModal';
@@ -6,10 +6,12 @@ import { ValetudoSettingsPanel } from '../ValetudoSettingsPanel/ValetudoSettings
 import { ModeTabs } from '../ModeTabs';
 import { ActionButtons } from '../ActionButtons';
 import { Toast } from '../common';
+import { RestrictionsToolbar } from '../RestrictionsToolbar/RestrictionsToolbar';
 import { VACUUM_MOP_ICON_SVG } from '../../constants';
 import { useVacuumCardState, useToast, useTheme } from '../../hooks';
 import { useValetudoServices } from '../../hooks/useValetudoServices';
 import { useValetudoMap } from '../../hooks/useValetudoMap';
+import { useRestrictions, buildRestrictionsPayload } from '../../hooks/useRestrictions';
 import { deriveValetudoEntityIds } from '../../types/valetudo';
 import type { Hass, RoomPosition } from '../../types/homeassistant';
 import type { ValetudoHassConfig } from '../../types/valetudo';
@@ -149,6 +151,47 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
     setSelectedZone(null);
   };
 
+  const { restrictions, setTool, addWall, addZone, selectItem, deleteSelected, markSaved } =
+    useRestrictions({ mapData, active: isRestrictionsMode });
+
+  const [restrictionsSaving, setRestrictionsSaving] = useState(false);
+
+  const handleRestrictionDrawn = useCallback(
+    (drawType: 'wall' | 'zone', p1: { x: number; y: number }, p2: { x: number; y: number }) => {
+      if (drawType === 'wall') {
+        addWall(p1, p2);
+      } else {
+        const zoneType = restrictions.tool === 'no_mop' ? 'mop' : 'regular';
+        addZone(zoneType, p1, p2);
+      }
+    },
+    [addWall, addZone, restrictions.tool],
+  );
+
+  const handleSaveRestrictions = useCallback(async () => {
+    const identifier = entityIds.mqttIdentifier;
+    if (!identifier) {
+      showToast('MQTT identifier not found');
+      return;
+    }
+    setRestrictionsSaving(true);
+    try {
+      const payload = buildRestrictionsPayload(restrictions.walls, restrictions.zones);
+      const topic = `valetudo/${identifier}/CombinedVirtualRestrictionsCapability/set`;
+      await hass.callService('mqtt', 'publish', {
+        topic,
+        payload: JSON.stringify(payload),
+        retain: false,
+      });
+      markSaved();
+      showToast('Ограничения сохранены');
+    } catch (err) {
+      showToast('Ошибка сохранения ограничений');
+    } finally {
+      setRestrictionsSaving(false);
+    }
+  }, [entityIds.mqttIdentifier, restrictions, hass, markSaved, showToast]);
+
   const controlsDisabled = isRunning;
 
   return (
@@ -175,6 +218,9 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
             selectedRooms={selectedMode === 'room' ? selectedRooms : undefined}
             zone={selectedMode === 'zone' ? selectedZone : null}
             onZoneChange={setSelectedZone}
+            restrictions={isRestrictionsMode ? restrictions : undefined}
+            onRestrictionDrawn={isRestrictionsMode ? handleRestrictionDrawn : undefined}
+            onRestrictionSelect={isRestrictionsMode ? selectItem : undefined}
             onSegmentClick={selectedMode === 'room'
               ? (segId) => {
                   const room = rooms.find((r) => r.id === segId);
@@ -191,9 +237,13 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
 
         <div className="cleaning-mode-button-wrapper">
           {isRestrictionsMode ? (
-            <div className="valetudo-restrictions-hint">
-              <span>Режим просмотра ограничений</span>
-            </div>
+            <RestrictionsToolbar
+              restrictions={restrictions}
+              onToolChange={setTool}
+              onDeleteSelected={deleteSelected}
+              onSave={handleSaveRestrictions}
+              saving={restrictionsSaving}
+            />
           ) : (
           <button
             className={`cleaning-mode-button${controlsDisabled ? ' cleaning-mode-button--disabled' : ''}`}
