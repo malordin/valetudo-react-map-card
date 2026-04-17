@@ -4,6 +4,9 @@
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     ["@semantic-release/npm", { "npmPublish": false }],
+    ["@semantic-release/exec", {
+      "prepareCmd": "npm run build"
+    }],
     ["@semantic-release/github", {
       "assets": [
         { "path": "dist/dreame-vacuum-map-card.js", "label": "dreame-vacuum-map-card.js" }
