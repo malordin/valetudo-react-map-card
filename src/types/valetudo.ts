@@ -25,6 +25,12 @@ export interface ValetudoHassConfig {
    * set this to "HarshSillyPigeon".
    */
   valetudo_identifier?: string;
+  /**
+   * Direct URL to the Valetudo REST API (optional).
+   * If provided, restrictions are saved via REST (more reliable than MQTT).
+   * Example: http://192.168.0.162
+   */
+  valetudo_url?: string;
   // Optional overrides for non-standard entity naming
   map_entity?: string;
   fan_entity?: string;

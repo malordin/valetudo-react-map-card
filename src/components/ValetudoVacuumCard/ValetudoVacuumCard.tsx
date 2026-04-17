@@ -169,28 +169,48 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
   );
 
   const handleSaveRestrictions = useCallback(async () => {
-    const identifier = entityIds.mqttIdentifier;
-    if (!identifier) {
-      showToast('MQTT identifier not found');
-      return;
-    }
+    const payload = buildRestrictionsPayload(restrictions.walls, restrictions.zones);
+    console.log('[valetudo] Saving restrictions:', JSON.stringify(payload));
     setRestrictionsSaving(true);
     try {
-      const payload = buildRestrictionsPayload(restrictions.walls, restrictions.zones);
-      const topic = `valetudo/${identifier}/CombinedVirtualRestrictionsCapability/set`;
-      await hass.callService('mqtt', 'publish', {
-        topic,
-        payload: JSON.stringify(payload),
-        retain: false,
-      });
+      const robotUrl = config.valetudo_url?.replace(/\/$/, '');
+      if (robotUrl) {
+        // Prefer direct REST API (reliable, no MQTT dependency)
+        const res = await fetch(
+          `${robotUrl}/api/v2/robot/capabilities/CombinedVirtualRestrictionsCapability`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        console.log('[valetudo] Restrictions saved via REST');
+      } else {
+        // Fallback to MQTT
+        const identifier = entityIds.mqttIdentifier;
+        if (!identifier) {
+          showToast('⚠️ Добавь valetudo_url или valetudo_identifier в конфиг');
+          return;
+        }
+        const topic = `valetudo/${identifier}/CombinedVirtualRestrictionsCapability/set`;
+        console.log('[valetudo] Publishing to MQTT topic:', topic);
+        await hass.callService('mqtt', 'publish', {
+          topic,
+          payload: JSON.stringify(payload),
+          retain: false,
+        });
+        console.log('[valetudo] MQTT publish done');
+      }
       markSaved();
       showToast('Ограничения сохранены');
     } catch (err) {
-      showToast('Ошибка сохранения ограничений');
+      console.error('[valetudo] Save restrictions failed:', err);
+      showToast(`Ошибка сохранения: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setRestrictionsSaving(false);
     }
-  }, [entityIds.mqttIdentifier, restrictions, hass, markSaved, showToast]);
+  }, [config.valetudo_url, entityIds.mqttIdentifier, restrictions, hass, markSaved, showToast]);
 
   const controlsDisabled = isRunning;
 

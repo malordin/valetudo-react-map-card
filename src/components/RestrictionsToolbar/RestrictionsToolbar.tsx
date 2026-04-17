@@ -11,10 +11,10 @@ interface RestrictionsToolbarProps {
 }
 
 const TOOLS: { key: RestrictionTool; label: string; icon: React.ReactNode }[] = [
-  { key: 'select', label: 'Выбрать', icon: <MousePointer size={16} /> },
-  { key: 'wall', label: 'Стена', icon: <Minus size={16} /> },
-  { key: 'no_go', label: 'No-go', icon: <Square size={16} /> },
-  { key: 'no_mop', label: 'No-mop', icon: <Droplets size={16} /> },
+  { key: 'select', label: 'Выбрать', icon: <MousePointer size={14} /> },
+  { key: 'wall', label: 'Стена', icon: <Minus size={14} /> },
+  { key: 'no_go', label: 'No-go', icon: <Square size={14} /> },
+  { key: 'no_mop', label: 'No-mop', icon: <Droplets size={14} /> },
 ];
 
 export function RestrictionsToolbar({
@@ -27,13 +27,13 @@ export function RestrictionsToolbar({
   const { tool, selectedId, dirty } = restrictions;
 
   return (
-    <div className="restrictions-toolbar">
-      <div className="restrictions-toolbar__tools">
+    <div className="rt">
+      <div className="rt__seg">
         {TOOLS.map((t) => (
           <button
             key={t.key}
             type="button"
-            className={`restrictions-toolbar__btn${tool === t.key ? ' restrictions-toolbar__btn--active' : ''} restrictions-toolbar__btn--${t.key}`}
+            className={`rt__seg-btn rt__seg-btn--${t.key}${tool === t.key ? ' rt__seg-btn--active' : ''}`}
             onClick={() => onToolChange(t.key)}
             title={t.label}
           >
@@ -43,26 +43,25 @@ export function RestrictionsToolbar({
         ))}
       </div>
 
-      <div className="restrictions-toolbar__actions">
+      <div className="rt__actions">
         {selectedId && (
           <button
             type="button"
-            className="restrictions-toolbar__btn restrictions-toolbar__btn--delete"
+            className="rt__action-btn rt__action-btn--delete"
             onClick={onDeleteSelected}
-            title="Удалить выбранный элемент"
+            title="Удалить выбранный"
           >
-            <Trash2 size={16} />
-            <span>Удалить</span>
+            <Trash2 size={14} />
           </button>
         )}
         <button
           type="button"
-          className={`restrictions-toolbar__btn restrictions-toolbar__btn--save${dirty ? ' restrictions-toolbar__btn--save--dirty' : ''}`}
+          className={`rt__action-btn rt__action-btn--save${dirty ? ' rt__action-btn--save-dirty' : ''}`}
           onClick={onSave}
           disabled={saving || !dirty}
-          title="Сохранить изменения"
+          title={dirty ? 'Сохранить изменения' : 'Нет изменений'}
         >
-          <Save size={16} />
+          <Save size={14} />
           <span>{saving ? '…' : 'Сохранить'}</span>
         </button>
       </div>

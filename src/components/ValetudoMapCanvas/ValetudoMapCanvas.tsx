@@ -633,7 +633,7 @@ export function ValetudoMapCanvas({ mapData, mode, selectedRooms, zone, onZoneCh
     const my = Math.floor(pt.y / SCALE) + bb.minY;
     const segId = segLookupRef.current.get(`${mx},${my}`);
     if (segId !== undefined) onSegmentClick(segId);
-  }, [mode, onSegmentClick, screenToCanvas]);
+  }, [mode, onSegmentClick, screenToCanvas, restrictions, onRestrictionSelect]);
 
   // ─── Widget zone drag handles ──────────────────────────────────────────────
   // widgetZone coords are in canvas logical px; on screen they appear scaled
