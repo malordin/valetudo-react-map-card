@@ -139,7 +139,7 @@ export function useValetudoServices({ hass, entityIds, onSuccess, language = 'en
           break;
       }
     },
-     
+
     [handleStart, handleCleanSegments, hass, entityIds.mqttIdentifier, onSuccess, t]
   );
 
