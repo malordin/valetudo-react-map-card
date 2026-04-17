@@ -75,7 +75,7 @@ Replace `192.168.0.xxx` with your robot's IP. **Restart HA** after adding this (
 
 ### 2. `configuration.yaml` — REST command for Mapping (remote URL fallback)
 
-Mapping start first tries direct REST via `valetudo_url`. If your HA frontend cannot reach the robot directly (HTTPS/mixed-content/CORS), add this `rest_command` fallback:
+The mapping feature first tries direct REST via `valetudo_url`. If your HA frontend cannot reach the robot directly (HTTPS/mixed-content/CORS), add this `rest_command` fallback:
 
 ```yaml
 rest_command:
