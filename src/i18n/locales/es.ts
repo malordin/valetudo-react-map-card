@@ -222,6 +222,8 @@ export const es: Translation = {
       water_level: 'Nivel de agua',
       iterations: 'Pasadas de limpieza',
       mapping: 'Mapeo',
+      mapping_warning_overwrite: '⚠️ El mapeo sobrescribirá el mapa actual.',
+      mapping_warning_loss: 'Se perderán el progreso de limpieza actual y todas las zonas de restricción. ¿Continuar?',
     },
     map: {
       loading: 'Cargando mapa…',

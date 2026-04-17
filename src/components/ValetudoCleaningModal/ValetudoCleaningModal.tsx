@@ -100,6 +100,10 @@ export function ValetudoCleaningModal({
 
   const handleMappingClick = () => {
     if (disabled || !onStartMapping) return;
+    const confirmedOverwrite = window.confirm(t('valetudo.cleaning.mapping_warning_overwrite'));
+    if (!confirmedOverwrite) return;
+    const confirmedLoss = window.confirm(t('valetudo.cleaning.mapping_warning_loss'));
+    if (!confirmedLoss) return;
     onStartMapping();
     onClose();
   };

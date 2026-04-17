@@ -219,6 +219,8 @@ export const pl = {
       water_level: 'Poziom wody',
       iterations: 'Przebiegi sprzątania',
       mapping: 'Mapowanie',
+      mapping_warning_overwrite: '⚠️ Mapowanie nadpisze bieżącą mapę.',
+      mapping_warning_loss: 'Utracisz bieżący postęp sprzątania i wszystkie strefy ograniczeń. Kontynuować?',
     },
     map: {
       loading: 'Ładowanie mapy…',

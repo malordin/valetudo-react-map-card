@@ -221,6 +221,8 @@ export const zh: Translation = {
       water_level: '水量',
       iterations: '清洁遍数',
       mapping: '建图',
+      mapping_warning_overwrite: '⚠️ 建图将覆盖当前地图。',
+      mapping_warning_loss: '当前清洁进度和所有限制区域将丢失。是否继续？',
     },
     map: {
       loading: '地图加载中…',

@@ -222,6 +222,8 @@ export const nl: Translation = {
       water_level: 'Waterniveau',
       iterations: 'Reinigingspassen',
       mapping: 'Kartering',
+      mapping_warning_overwrite: '⚠️ Kartering overschrijft de huidige kaart.',
+      mapping_warning_loss: 'De huidige schoonmaakvoortgang en alle beperkingszones gaan verloren. Doorgaan?',
     },
     map: {
       loading: 'Kaart laden…',

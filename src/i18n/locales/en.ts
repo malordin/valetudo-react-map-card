@@ -219,6 +219,8 @@ export const en = {
       water_level: 'Water level',
       iterations: 'Cleaning passes',
       mapping: 'Mapping run',
+      mapping_warning_overwrite: '⚠️ Mapping will overwrite the current map.',
+      mapping_warning_loss: 'Current cleaning progress and all restriction zones will be lost. Continue?',
     },
     map: {
       loading: 'Loading map\u2026',

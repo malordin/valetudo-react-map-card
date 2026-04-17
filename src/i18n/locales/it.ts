@@ -222,6 +222,9 @@ export const it: Translation = {
       water_level: 'Livello acqua',
       iterations: 'Passate di pulizia',
       mapping: 'Mappatura',
+      mapping_warning_overwrite: '⚠️ La mappatura sovrascriverà la mappa corrente.',
+      mapping_warning_loss:
+        'Il progresso di pulizia corrente e tutte le zone di restrizione andranno persi. Continuare?',
     },
     map: {
       loading: 'Caricamento mappa…',

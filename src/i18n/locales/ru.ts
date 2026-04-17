@@ -222,6 +222,8 @@ export const ru: Translation = {
       water_level: 'Уровень воды',
       iterations: 'Количество проходов',
       mapping: 'Картирование',
+      mapping_warning_overwrite: '⚠️ Картирование перезапишет текущую карту.',
+      mapping_warning_loss: 'Текущий прогресс уборки и все зоны ограничений будут утеряны. Продолжить?',
     },
     map: {
       loading: 'Загрузка карты…',

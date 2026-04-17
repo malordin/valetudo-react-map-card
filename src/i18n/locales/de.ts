@@ -223,6 +223,8 @@ export const de: Translation = {
       water_level: 'Wasserstand',
       iterations: 'Reinigungsdurchläufe',
       mapping: 'Kartierung',
+      mapping_warning_overwrite: '⚠️ Die Kartierung überschreibt die aktuelle Karte.',
+      mapping_warning_loss: 'Der aktuelle Reinigungsfortschritt und alle Sperrzonen gehen verloren. Fortfahren?',
     },
     map: {
       loading: 'Karte lädt…',
