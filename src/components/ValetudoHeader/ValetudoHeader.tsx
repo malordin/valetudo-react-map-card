@@ -80,8 +80,8 @@ export function ValetudoHeader({
             className={`header__restrictions-btn${restrictionsMode ? ' header__restrictions-btn--active' : ''}`}
             onClick={onRestrictionsToggle}
             type="button"
-            aria-label={t('valetudo.restrictions')}
-            title={t('valetudo.restrictions')}
+            aria-label={t('valetudo.restrictions_label')}
+            title={t('valetudo.restrictions_label')}
           >
             <ShieldAlert size={20} />
           </button>

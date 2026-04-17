@@ -178,16 +178,16 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
           '    content_type: application/json\n' +
           '    payload: "{{ payload }}"';
         console.warn('[valetudo] Could not save — no working method.\n' + configHint);
-        showToast('⚠️ Нужна настройка. Смотри консоль (F12).');
+        showToast(t('valetudo.toast.config_needed'));
         return;
       }
 
       markSaved();
-      showToast('Ограничения сохранены');
+      showToast(t('valetudo.toast.saved'));
       setTimeout(refetchMap, 800);
     } catch (err) {
       console.error('[valetudo] Save failed:', err);
-      showToast(`Ошибка: ${err instanceof Error ? err.message : String(err)}`);
+      showToast(t('valetudo.toast.error', { message: err instanceof Error ? err.message : String(err) }));
     } finally {
       setRestrictionsSaving(false);
     }
@@ -275,6 +275,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
               onDeleteSelected={deleteSelected}
               onSave={handleSaveRestrictions}
               saving={restrictionsSaving}
+              language={language}
             />
           ) : (
             <button

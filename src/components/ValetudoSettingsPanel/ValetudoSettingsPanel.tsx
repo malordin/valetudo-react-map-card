@@ -50,13 +50,13 @@ function formatSeconds(secs: number): string {
   const totalMin = Math.floor(secs / 60);
   const hours = Math.floor(totalMin / 60);
   const mins = totalMin % 60;
-  if (hours > 0) return `${hours} ч ${mins} м`;
-  return `${totalMin} м`;
+  if (hours > 0) return `${hours} h ${mins} m`;
+  return `${totalMin} m`;
 }
 
 function formatCm2(cm2: number): string {
   const m2 = cm2 / 10000;
-  return `${m2 < 10 ? m2.toFixed(1) : Math.round(m2)} м²`;
+  return `${m2 < 10 ? m2.toFixed(1) : Math.round(m2)} m²`;
 }
 
 interface ConsumableRowProps {
@@ -64,9 +64,10 @@ interface ConsumableRowProps {
   entity?: HassEntity;
   maxKey: string;
   onReset: () => void;
+  t: (key: string, vars?: Record<string, string>) => string;
 }
 
-function ConsumableRow({ label, entity, maxKey, onReset }: ConsumableRowProps) {
+function ConsumableRow({ label, entity, maxKey, onReset, t }: ConsumableRowProps) {
   const rawState = entity?.state;
   const mins = rawState && !['unavailable', 'unknown'].includes(rawState) ? Number(rawState) : null;
   const maxMins = CONSUMABLE_MAX[maxKey] ?? 1;
@@ -82,22 +83,29 @@ function ConsumableRow({ label, entity, maxKey, onReset }: ConsumableRowProps) {
           ? 'var(--warning-color, #ff9500)'
           : 'var(--error-color, #ff3b30)';
 
+  const tooltipText =
+    mins === null
+      ? ''
+      : isDepleted
+        ? t('valetudo.panel.needs_replacement')
+        : t('valetudo.panel.remaining', { time: formatMinutesRemaining(mins) });
+
   return (
     <div className="consumable-row">
       <div className="consumable-row__header">
         <span className="consumable-row__label">{label}</span>
         <span
           className={`consumable-row__value${isDepleted ? ' consumable-row__value--depleted' : ''}`}
-          title={mins === null ? '' : isDepleted ? 'Требует замены' : `Осталось: ${formatMinutesRemaining(mins)}`}
+          title={tooltipText}
         >
-          {pct !== null ? (isDepleted ? 'Заменить' : `${pct}%`) : '—'}
+          {pct !== null ? (isDepleted ? t('valetudo.panel.replace') : `${pct}%`) : '—'}
         </span>
         <button
           className="consumable-row__reset-btn"
           onClick={onReset}
           type="button"
-          title="Сбросить расходник"
-          aria-label={`Сбросить: ${label}`}
+          title={t('valetudo.panel.reset')}
+          aria-label={`${t('valetudo.panel.reset')}: ${label}`}
         >
           ↺
         </button>
@@ -153,7 +161,9 @@ export function ValetudoSettingsPanel({
   const wifiSsid = (wifiAttrs?.ssid as string | undefined) ?? '—';
   const wifiIp = (wifiAttrs?.ips as string[] | undefined)?.[0] ?? '—';
   const wifiRssi =
-    wifiEntity?.state && !['unavailable', 'unknown'].includes(wifiEntity.state) ? `${wifiEntity.state} дБм` : '—';
+    wifiEntity?.state && !['unavailable', 'unknown'].includes(wifiEntity.state)
+      ? `${wifiEntity.state} ${t('valetudo.panel.dbm')}`
+      : '—';
 
   // Total statistics (area in cm², time in s, count unitless)
   const totalAreaRaw = totalStatsAreaEntity?.state;
@@ -188,18 +198,20 @@ export function ValetudoSettingsPanel({
   return (
     <Modal opened={opened} onClose={onClose}>
       <div className="valetudo-settings-panel">
-        <h2 className="valetudo-settings-panel__title">Настройки</h2>
+        <h2 className="valetudo-settings-panel__title">{t('valetudo.panel.title')}</h2>
 
         <div className="valetudo-settings-panel__scroll">
-          {/* === Информация === */}
-          <Accordion title="Устройство" icon={<Info />} defaultOpen>
+          {/* === Device === */}
+          <Accordion title={t('valetudo.panel.device')} icon={<Info />} defaultOpen>
             <div className="valetudo-settings-section">
               {[
-                { label: 'Состояние', value: stateLabel },
-                batteryLevel !== null && !isNaN(batteryLevel) ? { label: 'Батарея', value: `${batteryLevel}%` } : null,
-                { label: 'Wi-Fi', value: wifiSsid },
-                { label: 'Сигнал', value: wifiRssi },
-                { label: 'IP-адрес', value: wifiIp },
+                { label: t('valetudo.panel.status'), value: stateLabel },
+                batteryLevel !== null && !isNaN(batteryLevel)
+                  ? { label: t('valetudo.panel.battery'), value: `${batteryLevel}%` }
+                  : null,
+                { label: t('valetudo.panel.wifi'), value: wifiSsid },
+                { label: t('valetudo.panel.signal'), value: wifiRssi },
+                { label: t('valetudo.panel.ip_address'), value: wifiIp },
               ]
                 .filter(Boolean)
                 .map((item) => (
@@ -211,84 +223,88 @@ export function ValetudoSettingsPanel({
             </div>
           </Accordion>
 
-          {/* === Расходники === */}
-          <Accordion title="Расходники" icon={<Wrench />} defaultOpen>
+          {/* === Consumables === */}
+          <Accordion title={t('valetudo.panel.consumables')} icon={<Wrench />} defaultOpen>
             <div className="valetudo-settings-section valetudo-settings-section--consumables">
               <ConsumableRow
-                label="Основная щётка"
+                label={t('valetudo.panel.main_brush')}
                 entity={mainBrushEntity}
                 maxKey="mainBrush"
                 onReset={() => pressButton(entityIds.resetMainBrush)}
+                t={t}
               />
               <ConsumableRow
-                label="Боковая щётка"
+                label={t('valetudo.panel.side_brush')}
                 entity={rightBrushEntity}
                 maxKey="rightBrush"
                 onReset={() => pressButton(entityIds.resetRightBrush)}
+                t={t}
               />
               <ConsumableRow
-                label="Фильтр"
+                label={t('valetudo.panel.filter')}
                 entity={mainFilterEntity}
                 maxKey="mainFilter"
                 onReset={() => pressButton(entityIds.resetMainFilter)}
+                t={t}
               />
               <ConsumableRow
-                label="Датчики"
+                label={t('valetudo.panel.sensors')}
                 entity={sensorCleaningEntity}
                 maxKey="sensorCleaning"
                 onReset={() => pressButton(entityIds.resetSensorCleaning)}
+                t={t}
               />
             </div>
           </Accordion>
 
-          {/* === Статистика === */}
-          <Accordion title="Статистика" icon={<BarChart2 />}>
+          {/* === Statistics === */}
+          <Accordion title={t('valetudo.panel.statistics')} icon={<BarChart2 />}>
             <div className="valetudo-settings-section">
               {totalCount !== null && (
                 <div className="valetudo-settings-section__row">
-                  <span className="valetudo-settings-section__label">Всего уборок</span>
+                  <span className="valetudo-settings-section__label">{t('valetudo.panel.total_cleanings')}</span>
                   <span className="valetudo-settings-section__value">{totalCount}</span>
                 </div>
               )}
               {totalAreaCm !== null && (
                 <div className="valetudo-settings-section__row">
-                  <span className="valetudo-settings-section__label">Общая площадь</span>
+                  <span className="valetudo-settings-section__label">{t('valetudo.panel.total_area')}</span>
                   <span className="valetudo-settings-section__value">{formatCm2(totalAreaCm)}</span>
                 </div>
               )}
               {totalTimeSec !== null && (
                 <div className="valetudo-settings-section__row">
-                  <span className="valetudo-settings-section__label">Общее время</span>
+                  <span className="valetudo-settings-section__label">{t('valetudo.panel.total_time')}</span>
                   <span className="valetudo-settings-section__value">{formatSeconds(totalTimeSec)}</span>
                 </div>
               )}
               {(curAreaCm !== null || curTimeSec !== null) && <div className="valetudo-settings-section__divider" />}
               {curAreaCm !== null && (
                 <div className="valetudo-settings-section__row">
-                  <span className="valetudo-settings-section__label">Текущая уборка — площадь</span>
+                  <span className="valetudo-settings-section__label">{t('valetudo.panel.current_area')}</span>
                   <span className="valetudo-settings-section__value">{formatCm2(curAreaCm)}</span>
                 </div>
               )}
               {curTimeSec !== null && (
                 <div className="valetudo-settings-section__row">
-                  <span className="valetudo-settings-section__label">Текущая уборка — время</span>
+                  <span className="valetudo-settings-section__label">{t('valetudo.panel.current_time')}</span>
                   <span className="valetudo-settings-section__value">{formatSeconds(curTimeSec)}</span>
                 </div>
               )}
             </div>
           </Accordion>
 
-          {/* === Настройки очистки === */}
-          <Accordion title="Настройки очистки" icon={<Settings2 />}>
+          {/* === Cleaning Settings === */}
+          <Accordion title={t('valetudo.panel.cleaning_settings')} icon={<Settings2 />}>
             <div className="valetudo-settings-section">
               {carpetModeEntity && (
                 <div className="valetudo-settings-section__row valetudo-settings-section__row--toggle">
-                  <span className="valetudo-settings-section__label">Ковровый режим</span>
+                  <span className="valetudo-settings-section__label">{t('valetudo.panel.carpet_mode')}</span>
                   <button
                     className={`valetudo-toggle${carpetModeOn ? ' valetudo-toggle--on' : ''}`}
                     onClick={toggleCarpetMode}
                     type="button"
-                    aria-label="Ковровый режим"
+                    aria-label={t('valetudo.panel.carpet_mode')}
                     aria-pressed={carpetModeOn}
                   >
                     <span className="valetudo-toggle__thumb" />
@@ -306,9 +322,9 @@ export function ValetudoSettingsPanel({
             </div>
           </Accordion>
 
-          {/* === Комнаты === */}
+          {/* === Rooms === */}
           {segments.length > 0 && (
-            <Accordion title="Комнаты" icon={<MapPin />}>
+            <Accordion title={t('valetudo.panel.rooms')} icon={<MapPin />}>
               <div className="valetudo-settings-section">
                 {segments.map((name, i) => (
                   <div key={i} className="valetudo-settings-section__row">
@@ -319,8 +335,8 @@ export function ValetudoSettingsPanel({
             </Accordion>
           )}
 
-          {/* === Конфигурация === */}
-          <Accordion title="Конфигурация" icon={<Cpu />}>
+          {/* === Configuration === */}
+          <Accordion title={t('valetudo.panel.configuration')} icon={<Cpu />}>
             <div className="valetudo-settings-section">
               {Object.entries(entityIds).map(([key, id]) => (
                 <div key={key} className="valetudo-settings-section__row">
