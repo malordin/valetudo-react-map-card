@@ -1,4 +1,6 @@
-.restrictions-toolbar { display: none; } // legacy class, unused
+.restrictions-toolbar {
+  display: none;
+} // legacy class, unused
 
 // ── Restrictions Toolbar ─────────────────────────────────────────────────────
 .rt {
@@ -31,10 +33,14 @@
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
-    transition: background 0.12s, color 0.12s;
+    transition:
+      background 0.12s,
+      color 0.12s;
     outline: none;
 
-    &:last-child { border-right: none; }
+    &:last-child {
+      border-right: none;
+    }
 
     &:hover:not(.rt__seg-btn--active) {
       background: rgba(255, 255, 255, 0.08);
@@ -66,7 +72,9 @@
       }
     }
 
-    svg { flex-shrink: 0; }
+    svg {
+      flex-shrink: 0;
+    }
   }
 
   // ── Actions pushed to the right ───────────────────────────────────────────
@@ -93,7 +101,10 @@
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
-    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    transition:
+      background 0.12s,
+      color 0.12s,
+      border-color 0.12s;
     outline: none;
 
     &:disabled {
@@ -136,7 +147,8 @@
       }
     }
 
-    svg { flex-shrink: 0; }
+    svg {
+      flex-shrink: 0;
+    }
   }
 }
-

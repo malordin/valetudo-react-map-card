@@ -82,16 +82,13 @@ export function ValetudoHeader({
           </button>
         )}
         <div className="header__title-wrapper">
-          <h2 className="header__title">{deviceName} <span style={{fontSize:'0.6em',opacity:0.45,fontWeight:400}}>v1.1.4</span></h2>
+          <h2 className="header__title">
+            {deviceName} <span style={{ fontSize: '0.6em', opacity: 0.45, fontWeight: 400 }}>v1.1.4</span>
+          </h2>
           <p className="header__status">{statusText}</p>
         </div>
         {onSettingsClick && (
-          <button
-            className="header__settings-btn"
-            onClick={onSettingsClick}
-            type="button"
-            aria-label="Settings"
-          >
+          <button className="header__settings-btn" onClick={onSettingsClick} type="button" aria-label="Settings">
             <Settings />
           </button>
         )}
@@ -108,11 +105,15 @@ export function ValetudoHeader({
           {showCurrentStats && (
             <>
               <div className="header__stat">
-                <span className="header__stat-icon header__stat-icon--area"><Scan size={16} /></span>
+                <span className="header__stat-icon header__stat-icon--area">
+                  <Scan size={16} />
+                </span>
                 <span className="header__stat-value">{formatCurrentArea(currentAreaCm)}</span>
               </div>
               <div className="header__stat">
-                <span className="header__stat-icon header__stat-icon--cleaning-time"><Clock size={16} /></span>
+                <span className="header__stat-icon header__stat-icon--cleaning-time">
+                  <Clock size={16} />
+                </span>
                 <span className="header__stat-value">{formatCurrentTime(currentTimeSec)}</span>
               </div>
             </>

@@ -14,7 +14,8 @@ function SpeedRow({ icon, label, options, current, onChange, disabled }: SpeedRo
   return (
     <div className="valetudo-speed-row">
       <span className="valetudo-speed-row__title">
-        <span>{icon}</span>{label}
+        <span>{icon}</span>
+        {label}
       </span>
       <div className="valetudo-speed-row__tabs">
         {options.map((option) => (
