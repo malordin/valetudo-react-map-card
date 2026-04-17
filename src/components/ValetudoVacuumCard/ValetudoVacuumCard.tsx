@@ -90,22 +90,66 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
 
   const wifiAttrs = wifiEntity?.attributes as Record<string, unknown> | undefined;
   const wifiIp = (wifiAttrs?.ips as string[] | undefined)?.[0];
-  const robotUrl = config.valetudo_url?.replace(/\/$/, '') || (wifiIp ? `http://${wifiIp}` : null);
+  // Used only to decide whether to show the Mapping button (not for direct fetch)
+  const hasRobotUrl = !!(config.valetudo_url || wifiIp);
 
   const handleStartMapping = useCallback(async () => {
-    if (!robotUrl) return;
     try {
-      const res = await fetch(`${robotUrl}/api/v2/robot/capabilities/MappingPassCapability`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'start_mapping' }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
+      let done = false;
+
+      // 1. Direct REST via valetudo_url from config (works from HTTP pages / local network without HTTPS)
+      const directUrl = config.valetudo_url?.replace(/\/$/, '');
+      if (directUrl) {
+        try {
+          const res = await fetch(`${directUrl}/api/v2/robot/capabilities/MappingPassCapability`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'start_mapping' }),
+          });
+          if (!res.ok) throw new Error(`REST ${res.status}`);
+          done = true;
+        } catch (fetchErr) {
+          console.warn('[valetudo] Direct mapping fetch failed:', fetchErr);
+        }
+      }
+
+      // 2. HA rest_command (proxied server-side — bypasses CORS/mixed-content)
+      if (!done) {
+        try {
+          await hass.callService('rest_command', 'valetudo_start_mapping', {});
+          done = true;
+        } catch (restErr: unknown) {
+          const msg = String(restErr);
+          if (
+            !msg.includes('not_found') &&
+            !msg.includes('Service not found') &&
+            !msg.includes('Service rest_command')
+          ) {
+            throw restErr;
+          }
+        }
+      }
+
+      if (!done) {
+        const hint =
+          'Добавь в configuration.yaml:\n' +
+          'rest_command:\n' +
+          '  valetudo_start_mapping:\n' +
+          '    url: "http://ROBOT_IP/api/v2/robot/capabilities/MappingPassCapability"\n' +
+          '    method: PUT\n' +
+          '    content_type: application/json\n' +
+          '    payload: \'{"action": "start_mapping"}\'';
+        console.warn('[valetudo] Cannot start mapping — no working method.\n' + hint);
+        showToast(t('valetudo.toast.config_needed'));
+        return;
+      }
+
       showToast(t('valetudo.toast.mapping_started'));
-    } catch {
+    } catch (err) {
+      console.error('[valetudo] Mapping failed:', err);
       showToast(t('valetudo.toast.mapping_error'));
     }
-  }, [robotUrl, showToast, t]);
+  }, [config.valetudo_url, hass, showToast, t]);
 
   const { handlePause, handleStop, handleDock, handleResume, handleSetFanSpeed, handleSetWater, handleClean } =
     useValetudoServices({
@@ -359,7 +403,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
         onWaterChange={handleSetWater}
         disabled={controlsDisabled}
         language={language}
-        onStartMapping={robotUrl ? handleStartMapping : undefined}
+        onStartMapping={hasRobotUrl ? handleStartMapping : undefined}
       />
 
       <ValetudoSettingsPanel
