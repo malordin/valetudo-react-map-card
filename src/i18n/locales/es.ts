@@ -233,6 +233,15 @@ export const es: Translation = {
       hours_minutes: '{{h}}h {{m}}m',
       minutes: '{{m}}m',
     },
+    config_error: {
+      restrictions_title: 'Restricciones virtuales — configuración necesaria',
+      mapping_title: 'Mapeo — configuración necesaria',
+      desc: 'No está configurado ni valetudo_url (editor de tarjeta) ni rest_command. Elige una opción:',
+      option_url:
+        'Opción 1 — recomendada: abre el editor de tarjeta y rellena el campo Valetudo URL (p. ej. http://192.168.0.162).',
+      option_rest_intro: 'Opción 2 — añade a configuration.yaml y recarga Home Assistant:',
+      close: 'Cerrar',
+    },
   },
 
   // Settings Panel

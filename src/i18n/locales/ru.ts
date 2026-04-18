@@ -233,6 +233,15 @@ export const ru: Translation = {
       hours_minutes: '{{h}}ч {{m}}м',
       minutes: '{{m}}м',
     },
+    config_error: {
+      restrictions_title: 'Виртуальные ограничения — нужна настройка',
+      mapping_title: 'Картирование — нужна настройка',
+      desc: 'Не задан ни valetudo_url (редактор карточки), ни rest_command. Выбери один из вариантов:',
+      option_url:
+        'Вариант 1 — рекомендуется: открой редактор карточки и заполни поле Valetudo URL (например http://192.168.0.162).',
+      option_rest_intro: 'Вариант 2 — добавь в configuration.yaml и перезагрузи Home Assistant:',
+      close: 'Закрыть',
+    },
   },
 
   // Settings Panel

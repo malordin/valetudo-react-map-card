@@ -5,7 +5,7 @@ import { ValetudoCleaningModal } from '../ValetudoCleaningModal/ValetudoCleaning
 import { ValetudoSettingsPanel } from '../ValetudoSettingsPanel/ValetudoSettingsPanel';
 import { ModeTabs } from '../ModeTabs';
 import { ActionButtons } from '../ActionButtons';
-import { Toast } from '../common';
+import { Toast, Modal } from '../common';
 import { RestrictionsToolbar } from '../RestrictionsToolbar/RestrictionsToolbar';
 import { VACUUM_MOP_ICON_SVG } from '../../constants';
 import { useVacuumCardState, useToast, useTheme } from '../../hooks';
@@ -87,6 +87,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
   } = useVacuumCardState({ defaultMode: config.default_mode });
 
   const { toast, showToast, hideToast } = useToast();
+  const [configErrorModal, setConfigErrorModal] = useState<'restrictions' | 'mapping' | null>(null);
 
   const wifiAttrs = wifiEntity?.attributes as Record<string, unknown> | undefined;
   const wifiIp = (wifiAttrs?.ips as string[] | undefined)?.[0];
@@ -140,7 +141,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
           '    content_type: application/json\n' +
           '    payload: \'{"action": "start_mapping"}\'';
         console.warn('[valetudo] Cannot start mapping — no working method.\n' + hint);
-        showToast(t('valetudo.toast.config_needed'));
+        setConfigErrorModal('mapping');
         return;
       }
 
@@ -241,7 +242,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
           '    content_type: application/json\n' +
           '    payload: "{{ payload }}"';
         console.warn('[valetudo] Could not save — no working method.\n' + configHint);
-        showToast(t('valetudo.toast.config_needed'));
+        setConfigErrorModal('restrictions');
         return;
       }
 
@@ -259,6 +260,22 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
   if (!vacuumEntity) {
     return <div className="valetudo-vacuum-card__error">Entity not found: {entityIds.vacuum}</div>;
   }
+
+  const RESTRICTIONS_YAML =
+    'rest_command:\n' +
+    '  valetudo_set_restrictions:\n' +
+    '    url: "http://ROBOT_IP/api/v2/robot/capabilities/CombinedVirtualRestrictionsCapability"\n' +
+    '    method: PUT\n' +
+    '    content_type: application/json\n' +
+    '    payload: "{{ payload }}"';
+
+  const MAPPING_YAML =
+    'rest_command:\n' +
+    '  valetudo_start_mapping:\n' +
+    '    url: "http://ROBOT_IP/api/v2/robot/capabilities/MappingPassCapability"\n' +
+    '    method: PUT\n' +
+    '    content_type: application/json\n' +
+    '    payload: \'{"action": "start_mapping"}\'';
 
   const isRunning = ['cleaning', 'returning'].includes(state);
   const isPaused = state === 'paused';
@@ -435,6 +452,25 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
 
       {toast && <Toast message={toast} onClose={hideToast} />}
       {!mapEntity && <div className="valetudo-vacuum-card__warning">Map entity not found: {entityIds.map}</div>}
+
+      <Modal opened={configErrorModal !== null} onClose={() => setConfigErrorModal(null)}>
+        <div className="valetudo-config-error">
+          <h3 className="valetudo-config-error__title">
+            {configErrorModal === 'restrictions'
+              ? t('valetudo.config_error.restrictions_title')
+              : t('valetudo.config_error.mapping_title')}
+          </h3>
+          <p className="valetudo-config-error__desc">{t('valetudo.config_error.desc')}</p>
+          <p className="valetudo-config-error__option">{t('valetudo.config_error.option_url')}</p>
+          <p className="valetudo-config-error__option">{t('valetudo.config_error.option_rest_intro')}</p>
+          <pre className="valetudo-config-error__yaml">
+            {configErrorModal === 'restrictions' ? RESTRICTIONS_YAML : MAPPING_YAML}
+          </pre>
+          <button className="valetudo-config-error__close" onClick={() => setConfigErrorModal(null)}>
+            {t('valetudo.config_error.close')}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -234,6 +234,15 @@ export const it: Translation = {
       hours_minutes: '{{h}}h {{m}}m',
       minutes: '{{m}}m',
     },
+    config_error: {
+      restrictions_title: 'Restrizioni virtuali — configurazione necessaria',
+      mapping_title: 'Mappatura — configurazione necessaria',
+      desc: "Né valetudo_url (editor scheda) né rest_command è configurato. Scegli un'opzione:",
+      option_url:
+        "Opzione 1 — consigliata: apri l'editor della scheda e inserisci il campo Valetudo URL (es. http://192.168.0.162).",
+      option_rest_intro: 'Opzione 2 — aggiungi a configuration.yaml e ricarica Home Assistant:',
+      close: 'Chiudi',
+    },
   },
 
   // Settings Panel

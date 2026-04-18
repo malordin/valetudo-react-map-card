@@ -232,6 +232,14 @@ export const zh: Translation = {
       hours_minutes: '{{h}}时{{m}}分',
       minutes: '{{m}}分',
     },
+    config_error: {
+      restrictions_title: '虚拟限制区域 — 需要配置',
+      mapping_title: '建图 — 需要配置',
+      desc: '未设置 valetudo_url（卡片编辑器）且未配置 rest_command。请选择一项：',
+      option_url: '选项 1（推荐）：打开卡片编辑器，填写 Valetudo URL 字段（例如 http://192.168.0.162）。',
+      option_rest_intro: '选项 2：添加到 configuration.yaml 并重新加载 Home Assistant：',
+      close: '关闭',
+    },
   },
 
   // Settings Panel (设置面板)

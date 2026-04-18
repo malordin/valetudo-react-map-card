@@ -233,6 +233,15 @@ export const nl: Translation = {
       hours_minutes: '{{h}}u {{m}}m',
       minutes: '{{m}}m',
     },
+    config_error: {
+      restrictions_title: 'Virtuele beperkingen — configuratie vereist',
+      mapping_title: 'Kaartopname — configuratie vereist',
+      desc: 'Noch valetudo_url (kaarteditor) noch rest_command is geconfigureerd. Kies een optie:',
+      option_url:
+        'Optie 1 — aanbevolen: open de kaarteditor en vul het veld Valetudo URL in (bijv. http://192.168.0.162).',
+      option_rest_intro: 'Optie 2 — voeg toe aan configuration.yaml en herlaad Home Assistant:',
+      close: 'Sluiten',
+    },
   },
 
   settings: {
