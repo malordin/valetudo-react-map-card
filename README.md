@@ -4,6 +4,14 @@ A Home Assistant Lovelace card for Valetudo-flashed robot vacuums. Works **fully
 
 > Fork of [dreame-vacuum-map-card](https://github.com/noambergauz/dreame-vacuum-map-card), rewritten to work with [Valetudo](https://valetudo.cloud/) instead of the Dreame cloud integration.
 
+## Screenshots
+
+| Light theme | Dark theme |
+|---|---|
+| ![Main view (light)](screenshots/light-main.png) | ![Main view (dark)](screenshots/dark-main.png) |
+| ![Room cleaning (light)](screenshots/room-cleaning.png) | ![Zone cleaning (dark)](screenshots/dark-zone-cleaning.png) |
+| ![Settings (light)](screenshots/light-settings.png) | ![Settings (dark)](screenshots/dark-settings.png) |
+
 ## Features
 
 - Interactive live map (via Valetudo MQTT + HA camera entity)
