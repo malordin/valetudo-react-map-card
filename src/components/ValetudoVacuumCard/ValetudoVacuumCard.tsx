@@ -183,10 +183,10 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
   const handleRestrictionDrawn = useCallback(
     (drawType: 'wall' | 'zone', p1: { x: number; y: number }, p2: { x: number; y: number }) => {
       if (drawType === 'wall') {
-        addWall(p1, p2);
+        return addWall(p1, p2);
       } else {
         const zoneType = restrictions.tool === 'no_mop' ? 'mop' : 'regular';
-        addZone(zoneType, p1, p2);
+        return addZone(zoneType, p1, p2);
       }
     },
     [addWall, addZone, restrictions.tool]
@@ -313,7 +313,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
             onRestrictionDrawn={isRestrictionsMode ? handleRestrictionDrawn : undefined}
             onRestrictionSelect={isRestrictionsMode ? selectItem : undefined}
             iterations={cleanIterations}
-            onIterationsChange={setCleanIterations}
+            onIterationsChange={isRestrictionsMode ? undefined : setCleanIterations}
             language={language}
             onSegmentClick={
               selectedMode === 'room'

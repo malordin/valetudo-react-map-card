@@ -120,6 +120,114 @@
     cursor: crosshair;
   }
 
+  // ── Mobile pending restriction widget ─────────────────────────────────────
+  &__pending-restriction {
+    position: absolute;
+    border-radius: 3px;
+    box-sizing: border-box;
+
+    &--wall {
+      background: rgba(244, 67, 54, 0.1);
+      border: 2px dashed rgba(244, 67, 54, 0.85);
+    }
+
+    &--no_go {
+      background: rgba(244, 67, 54, 0.18);
+      border: 2px dashed rgba(244, 67, 54, 0.85);
+    }
+
+    &--no_mop {
+      background: rgba(33, 150, 243, 0.18);
+      border: 2px dashed rgba(33, 150, 243, 0.85);
+    }
+  }
+
+  &__pending-restriction-move {
+    position: absolute;
+    inset: 0;
+    cursor: move;
+    touch-action: none;
+
+    &::after {
+      content: '✥';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.4rem;
+      color: rgba(244, 67, 54, 0.85);
+      pointer-events: none;
+      text-shadow: 0 0 3px #000;
+    }
+  }
+
+  &__pending-restriction-resize {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: rgba(244, 67, 54, 0.9);
+    border-radius: 50%;
+    cursor: se-resize;
+    touch-action: none;
+    z-index: 2;
+
+    &::after {
+      content: '⤡';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.9rem;
+      color: #fff;
+      pointer-events: none;
+    }
+  }
+
+  &__pending-restriction-delete {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 22px;
+    height: 22px;
+    background: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    touch-action: none;
+  }
+
+  &__pending-restriction-confirm {
+    position: absolute;
+    bottom: -10px;
+    left: -10px;
+    width: 26px;
+    height: 26px;
+    background: #43a047;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    touch-action: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+
   &--restrictions-select {
     cursor: pointer;
   }

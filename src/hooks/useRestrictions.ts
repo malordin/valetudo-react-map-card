@@ -114,12 +114,14 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
   }, []);
 
   const addWall = useCallback((pA: { x: number; y: number }, pB: { x: number; y: number }) => {
+    const id = uid();
     setState((prev) => ({
       ...prev,
-      walls: [...prev.walls, { id: uid(), pA, pB }],
+      walls: [...prev.walls, { id, pA, pB }],
       dirty: true,
-      selectedId: null,
+      selectedId: id,
     }));
+    return id;
   }, []);
 
   const addZone = useCallback((type: 'regular' | 'mop', pA: { x: number; y: number }, pC: { x: number; y: number }) => {
@@ -128,12 +130,13 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
     const maxX = Math.max(pA.x, pC.x);
     const minY = Math.min(pA.y, pC.y);
     const maxY = Math.max(pA.y, pC.y);
+    const id = uid();
     setState((prev) => ({
       ...prev,
       zones: [
         ...prev.zones,
         {
-          id: uid(),
+          id,
           type,
           pA: { x: minX, y: minY },
           pB: { x: maxX, y: minY },
@@ -142,7 +145,50 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
         },
       ],
       dirty: true,
-      selectedId: null,
+      selectedId: id,
+    }));
+    return id;
+  }, []);
+
+  const updateWall = useCallback((id: string, pA: { x: number; y: number }, pB: { x: number; y: number }) => {
+    setState((prev) => ({
+      ...prev,
+      walls: prev.walls.map((w) => (w.id === id ? { ...w, pA, pB } : w)),
+      dirty: true,
+      selectedId: id,
+    }));
+  }, []);
+
+  const updateZone = useCallback((id: string, pA: { x: number; y: number }, pC: { x: number; y: number }) => {
+    const minX = Math.min(pA.x, pC.x);
+    const maxX = Math.max(pA.x, pC.x);
+    const minY = Math.min(pA.y, pC.y);
+    const maxY = Math.max(pA.y, pC.y);
+    setState((prev) => ({
+      ...prev,
+      zones: prev.zones.map((z) =>
+        z.id === id
+          ? {
+              ...z,
+              pA: { x: minX, y: minY },
+              pB: { x: maxX, y: minY },
+              pC: { x: maxX, y: maxY },
+              pD: { x: minX, y: maxY },
+            }
+          : z
+      ),
+      dirty: true,
+      selectedId: id,
+    }));
+  }, []);
+
+  const deleteItem = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      walls: prev.walls.filter((w) => w.id !== id),
+      zones: prev.zones.filter((z) => z.id !== id),
+      dirty: true,
+      selectedId: prev.selectedId === id ? null : prev.selectedId,
     }));
   }, []);
 
@@ -176,6 +222,9 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
     setTool,
     addWall,
     addZone,
+    updateWall,
+    updateZone,
+    deleteItem,
     selectItem,
     deleteSelected,
     markSaved,
