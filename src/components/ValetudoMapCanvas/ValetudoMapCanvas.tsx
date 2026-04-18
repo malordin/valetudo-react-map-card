@@ -22,7 +22,7 @@ const WALL_COLOR = 'rgba( 50,  50,  50, 1)';
 const PATH_COLOR = 'rgba(255, 255, 255, 0.85)';
 const CHARGER_COLOR = '#4CAF50';
 const ROBOT_COLOR = '#2196F3';
-const SCALE = 2; // px per map pixel
+const SCALE = 3; // px per map pixel
 
 function getBoundingBox(mapData: RawMapData) {
   let minX = Infinity,
@@ -318,13 +318,30 @@ export function ValetudoMapCanvas({
       const cx = (entity.points[0] / pixelSize - bb.minX) * SCALE;
       const cy = (entity.points[1] / pixelSize - bb.minY) * SCALE;
       const r = SCALE * 4;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = SCALE * 2;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, 2 * Math.PI);
       ctx.fillStyle = CHARGER_COLOR;
       ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
       ctx.strokeStyle = '#fff';
-      ctx.lineWidth = SCALE * 0.5;
+      ctx.lineWidth = SCALE * 0.7;
       ctx.stroke();
+      // lightning bolt symbol
+      ctx.beginPath();
+      ctx.moveTo(cx + r * 0.15, cy - r * 0.65);
+      ctx.lineTo(cx - r * 0.2, cy + r * 0.05);
+      ctx.lineTo(cx + r * 0.05, cy + r * 0.05);
+      ctx.lineTo(cx - r * 0.15, cy + r * 0.65);
+      ctx.lineTo(cx + r * 0.2, cy - r * 0.05);
+      ctx.lineTo(cx - r * 0.05, cy - r * 0.05);
+      ctx.closePath();
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.restore();
     }
 
     for (const entity of mapData.entities) {
@@ -332,21 +349,30 @@ export function ValetudoMapCanvas({
       const rx = (entity.points[0] / pixelSize - bb.minX) * SCALE;
       const ry = (entity.points[1] / pixelSize - bb.minY) * SCALE;
       const angle = (entity.metaData.angle ?? 0) * (Math.PI / 180);
-      const r = SCALE * 5;
+      const r = SCALE * 6;
       ctx.save();
       ctx.translate(rx, ry);
       ctx.rotate(angle);
+      // drop shadow
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = SCALE * 4;
+      // body
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, 2 * Math.PI);
       ctx.fillStyle = ROBOT_COLOR;
       ctx.fill();
+      // white ring
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
       ctx.strokeStyle = '#fff';
-      ctx.lineWidth = SCALE * 0.5;
+      ctx.lineWidth = SCALE * 0.9;
       ctx.stroke();
+      // direction chevron
       ctx.beginPath();
-      ctx.moveTo(0, -r * 0.5);
-      ctx.lineTo(r * 0.4, r * 0.5);
-      ctx.lineTo(-r * 0.4, r * 0.5);
+      ctx.moveTo(0, -r * 0.62); // tip
+      ctx.lineTo(r * 0.38, r * 0.42); // bottom-right
+      ctx.lineTo(0, r * 0.18); // centre notch
+      ctx.lineTo(-r * 0.38, r * 0.42); // bottom-left
       ctx.closePath();
       ctx.fillStyle = '#fff';
       ctx.fill();
