@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { DreameVacuumCard } from './components/DreameVacuumCard';
 import { ValetudoVacuumCard } from './components/ValetudoVacuumCard/ValetudoVacuumCard';
-import { ValetudoCardEditor } from './components/ValetudoCardEditor/ValetudoCardEditor';
 import type { Hass, HassConfig } from './types/homeassistant';
 import type { ValetudoHassConfig } from './types/valetudo';
 import { createMockHass } from './utils/mock';
@@ -195,61 +194,101 @@ class ValetudoVacuumMapCard extends HTMLElement {
     };
   }
 
-  static getConfigElement() {
-    return document.createElement('valetudo-vacuum-map-card-editor');
+  static getConfigForm() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const schema: any[] = [
+      {
+        name: 'entity',
+        required: true,
+        selector: { entity: { domain: 'vacuum' } },
+      },
+      {
+        name: 'valetudo_identifier',
+        selector: { text: {} },
+      },
+      {
+        name: 'title',
+        selector: { text: {} },
+      },
+      {
+        type: 'grid',
+        name: '',
+        flatten: true,
+        column_min_width: '180px',
+        schema: [
+          {
+            name: 'theme',
+            selector: {
+              select: {
+                options: [
+                  { label: 'Light ☀️', value: 'light' },
+                  { label: 'Dark 🌙', value: 'dark' },
+                ],
+                mode: 'dropdown',
+              },
+            },
+          },
+          {
+            name: 'language',
+            selector: {
+              select: {
+                options: [
+                  { label: 'English', value: 'en' },
+                  { label: 'Русский', value: 'ru' },
+                  { label: 'Deutsch', value: 'de' },
+                  { label: 'Español', value: 'es' },
+                  { label: 'Italiano', value: 'it' },
+                  { label: 'Nederlands', value: 'nl' },
+                  { label: 'Polski', value: 'pl' },
+                  { label: '中文', value: 'zh' },
+                ],
+                mode: 'dropdown',
+              },
+            },
+          },
+        ],
+      },
+      {
+        name: 'valetudo_url',
+        selector: { text: { type: 'url' } },
+      },
+      {
+        type: 'expandable',
+        name: 'advanced_overrides',
+        flatten: true,
+        title: 'Advanced entity overrides',
+        schema: [
+          { name: 'map_entity', selector: { entity: { domain: 'camera' } } },
+          { name: 'fan_entity', selector: { entity: { domain: 'select' } } },
+          { name: 'water_entity', selector: { entity: { domain: 'select' } } },
+          { name: 'battery_entity', selector: { entity: { domain: 'sensor' } } },
+          { name: 'segments_entity', selector: { entity: { domain: 'sensor' } } },
+        ],
+      },
+    ];
+
+    const labels: Record<string, string> = {
+      entity: 'Vacuum entity',
+      valetudo_identifier: 'Valetudo identifier (e.g. HarshSillyPigeon)',
+      title: 'Card title',
+      theme: 'Theme',
+      language: 'Language',
+      valetudo_url: 'Valetudo URL (for direct REST saves)',
+      map_entity: 'Map entity (camera.*)',
+      fan_entity: 'Fan speed entity (select.*)',
+      water_entity: 'Water grade entity (select.*)',
+      battery_entity: 'Battery entity (sensor.*)',
+      segments_entity: 'Segments entity (sensor.*)',
+    };
+
+    return {
+      schema,
+      computeLabel: (s: { name: string }) => labels[s.name] ?? s.name,
+    };
   }
 }
 
 customElements.define('valetudo-vacuum-map-card', ValetudoVacuumMapCard);
-
-// ─── Valetudo Card Editor element ──────────────────────────────────────────────
-
-class ValetudoVacuumMapCardEditor extends HTMLElement {
-  private _root: ReactDOM.Root | null = null;
-  private _hass?: Hass;
-  private _config?: ValetudoHassConfig;
-
-  set hass(hass: Hass) {
-    this._hass = hass;
-    this._render();
-  }
-
-  setConfig(config: ValetudoHassConfig) {
-    this._config = config;
-    this._render();
-  }
-
-  private _render() {
-    if (!this._hass || !this._config) return;
-
-    if (!this._root) {
-      this._root = ReactDOM.createRoot(this);
-    }
-
-    const hass = this._hass;
-    const config = this._config;
-
-    this._root.render(
-      <React.StrictMode>
-        <ValetudoCardEditor
-          hass={hass}
-          config={config}
-          onConfigChanged={(newConfig) => {
-            this.dispatchEvent(
-              new CustomEvent('config-changed', {
-                detail: { config: newConfig },
-                bubbles: true,
-                composed: true,
-              })
-            );
-          }}
-        />
-      </React.StrictMode>
-    );
-  }
-}
-
-customElements.define('valetudo-vacuum-map-card-editor', ValetudoVacuumMapCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
