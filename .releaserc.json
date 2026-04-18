@@ -9,7 +9,7 @@
     }],
     ["@semantic-release/github", {
       "assets": [
-        { "path": "dist/dreame-vacuum-map-card.js", "label": "dreame-vacuum-map-card.js" }
+        { "path": "dist/valetudo-react-map-card.js", "label": "valetudo-react-map-card.js" }
       ]
     }],
     ["@semantic-release/git", {

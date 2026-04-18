@@ -45,6 +45,6 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dreame-vacuum-map-card
-          path: dist/dreame-vacuum-map-card.js
+          name: valetudo-react-map-card
+          path: dist/valetudo-react-map-card.js
           retention-days: 30

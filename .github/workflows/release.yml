@@ -6,7 +6,50 @@ on:
       - master
 
 jobs:
+  validate:
+    name: Lint, Build & HACS Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint TypeScript
+        run: npm run lint
+
+      - name: Lint SCSS
+        run: npm run lint:scss
+
+      - name: Validate translations
+        run: npm run validate:translations
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate HACS
+        uses: hacs/action@main
+        with:
+          category: plugin
+          ignore: issues topics
+
   release:
+    name: Semantic Release
+    needs: validate
     runs-on: ubuntu-latest
 
     permissions:
