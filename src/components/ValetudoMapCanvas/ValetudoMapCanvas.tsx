@@ -317,7 +317,7 @@ export function ValetudoMapCanvas({
       if (entity.type !== 'charger_location' || entity.points.length < 2) continue;
       const cx = (entity.points[0] / pixelSize - bb.minX) * SCALE;
       const cy = (entity.points[1] / pixelSize - bb.minY) * SCALE;
-      const r = SCALE * 4;
+      const r = SCALE * 3.4;
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = SCALE * 2;
@@ -349,7 +349,7 @@ export function ValetudoMapCanvas({
       const rx = (entity.points[0] / pixelSize - bb.minX) * SCALE;
       const ry = (entity.points[1] / pixelSize - bb.minY) * SCALE;
       const angle = (entity.metaData.angle ?? 0) * (Math.PI / 180);
-      const r = SCALE * 6;
+      const r = SCALE * 3;
       ctx.save();
       ctx.translate(rx, ry);
       ctx.rotate(angle);

@@ -16283,12 +16283,12 @@ function $1({
       }
     for (const te of o.entities) {
       if (te.type !== "charger_location" || te.points.length < 2) continue;
-      const oe = (te.points[0] / W - G.minX) * _e, de = (te.points[1] / W - G.minY) * _e, ce = _e * 4;
+      const oe = (te.points[0] / W - G.minX) * _e, de = (te.points[1] / W - G.minY) * _e, ce = _e * 3.4;
       M.save(), M.shadowColor = "rgba(0,0,0,0.5)", M.shadowBlur = _e * 2, M.beginPath(), M.arc(oe, de, ce, 0, 2 * Math.PI), M.fillStyle = Z1, M.fill(), M.shadowColor = "transparent", M.shadowBlur = 0, M.strokeStyle = "#fff", M.lineWidth = _e * 0.7, M.stroke(), M.beginPath(), M.moveTo(oe + ce * 0.15, de - ce * 0.65), M.lineTo(oe - ce * 0.2, de + ce * 0.05), M.lineTo(oe + ce * 0.05, de + ce * 0.05), M.lineTo(oe - ce * 0.15, de + ce * 0.65), M.lineTo(oe + ce * 0.2, de - ce * 0.05), M.lineTo(oe - ce * 0.05, de - ce * 0.05), M.closePath(), M.fillStyle = "#fff", M.fill(), M.restore();
     }
     for (const te of o.entities) {
       if (te.type !== "robot_position" || te.points.length < 2) continue;
-      const oe = (te.points[0] / W - G.minX) * _e, de = (te.points[1] / W - G.minY) * _e, ce = (te.metaData.angle ?? 0) * (Math.PI / 180), pe = _e * 6;
+      const oe = (te.points[0] / W - G.minX) * _e, de = (te.points[1] / W - G.minY) * _e, ce = (te.metaData.angle ?? 0) * (Math.PI / 180), pe = _e * 3;
       M.save(), M.translate(oe, de), M.rotate(ce), M.shadowColor = "rgba(0,0,0,0.6)", M.shadowBlur = _e * 4, M.beginPath(), M.arc(0, 0, pe, 0, 2 * Math.PI), M.fillStyle = K1, M.fill(), M.shadowColor = "transparent", M.shadowBlur = 0, M.strokeStyle = "#fff", M.lineWidth = _e * 0.9, M.stroke(), M.beginPath(), M.moveTo(0, -pe * 0.62), M.lineTo(pe * 0.38, pe * 0.42), M.lineTo(0, pe * 0.18), M.lineTo(-pe * 0.38, pe * 0.42), M.closePath(), M.fillStyle = "#fff", M.fill(), M.restore();
     }
     for (const te of o.entities)
