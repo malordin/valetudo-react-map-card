@@ -238,6 +238,8 @@ export const it: Translation = {
       restrictions_title: 'Restrizioni virtuali — configurazione necessaria',
       mapping_title: 'Mappatura — configurazione necessaria',
       desc: "Né valetudo_url (editor scheda) né rest_command è configurato. Scegli un'opzione:",
+      desc_blocked:
+        'Il browser ha bloccato la connessione diretta al robot (HTTPS→HTTP non consentito). Aggiungi rest_command per instradare le richieste tramite Home Assistant:',
       option_url:
         "Opzione 1 — consigliata: apri l'editor della scheda e inserisci il campo Valetudo URL (es. http://192.168.0.162).",
       option_rest_intro: 'Opzione 2 — aggiungi a configuration.yaml e ricarica Home Assistant:',

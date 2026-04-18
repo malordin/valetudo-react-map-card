@@ -97,6 +97,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
 
   const { toast, showToast, hideToast } = useToast();
   const [configErrorModal, setConfigErrorModal] = useState<'restrictions' | 'mapping' | null>(null);
+  const [configErrorBlocked, setConfigErrorBlocked] = useState(false);
 
   const wifiAttrs = wifiEntity?.attributes as Record<string, unknown> | undefined;
   const wifiIp = (wifiAttrs?.ips as string[] | undefined)?.[0];
@@ -110,6 +111,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
 
       // 1. Direct REST via valetudo_url from config (works from HTTP pages / local network without HTTPS)
       const directUrl = resolvedRobotUrl;
+      let fetchBlocked = false;
       if (directUrl) {
         try {
           const res = await fetch(`${directUrl}/api/v2/robot/capabilities/MappingPassCapability`, {
@@ -120,6 +122,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
           if (!res.ok) throw new Error(`REST ${res.status}`);
           done = true;
         } catch (fetchErr) {
+          if (fetchErr instanceof TypeError) fetchBlocked = true;
           console.warn('[valetudo] Direct mapping fetch failed:', fetchErr);
         }
       }
@@ -146,6 +149,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
           '    content_type: application/json\n' +
           '    payload: \'{"action": "start_mapping"}\'';
         console.warn('[valetudo] Cannot start mapping — no working method.\n' + hint);
+        setConfigErrorBlocked(fetchBlocked);
         setConfigErrorModal('mapping');
         return;
       }
@@ -207,6 +211,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
 
       // 1. Direct REST via valetudo_url from config (works from HTTP pages)
       const robotUrl = resolvedRobotUrl;
+      let fetchBlocked = false;
       if (robotUrl) {
         try {
           const res = await fetch(`${robotUrl}/api/v2/robot/capabilities/CombinedVirtualRestrictionsCapability`, {
@@ -220,6 +225,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
         } catch (fetchErr) {
           if (fetchErr instanceof TypeError) {
             // NetworkError / mixed content (HTTPS→HTTP) — fall through to rest_command
+            fetchBlocked = true;
             console.warn('[valetudo] Direct fetch failed (mixed content / network error), trying rest_command');
           } else {
             throw fetchErr;
@@ -254,6 +260,7 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
           '    content_type: application/json\n' +
           '    payload: "{{ payload }}"';
         console.warn('[valetudo] Could not save — no working method.\n' + configHint);
+        setConfigErrorBlocked(fetchBlocked);
         setConfigErrorModal('restrictions');
         return;
       }
@@ -475,9 +482,15 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
               ? t('valetudo.config_error.restrictions_title')
               : t('valetudo.config_error.mapping_title')}
           </h3>
-          <p className="valetudo-config-error__desc">{t('valetudo.config_error.desc')}</p>
-          <p className="valetudo-config-error__option">{t('valetudo.config_error.option_url')}</p>
-          <p className="valetudo-config-error__option">{t('valetudo.config_error.option_rest_intro')}</p>
+          <p className="valetudo-config-error__desc">
+            {t(configErrorBlocked ? 'valetudo.config_error.desc_blocked' : 'valetudo.config_error.desc')}
+          </p>
+          {!configErrorBlocked && (
+            <p className="valetudo-config-error__option">{t('valetudo.config_error.option_url')}</p>
+          )}
+          {!configErrorBlocked && (
+            <p className="valetudo-config-error__option">{t('valetudo.config_error.option_rest_intro')}</p>
+          )}
           <pre className="valetudo-config-error__yaml">
             {configErrorModal === 'restrictions' ? RESTRICTIONS_YAML : MAPPING_YAML}
           </pre>

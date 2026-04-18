@@ -237,6 +237,8 @@ export const ru: Translation = {
       restrictions_title: 'Виртуальные ограничения — нужна настройка',
       mapping_title: 'Картирование — нужна настройка',
       desc: 'Не задан ни valetudo_url (редактор карточки), ни rest_command. Выбери один из вариантов:',
+      desc_blocked:
+        'Браузер заблокировал прямое подключение к роботу (HTTPS→HTTP запрещён браузером). Добавь rest_command, чтобы запросы проходили через Home Assistant:',
       option_url:
         'Вариант 1 — рекомендуется: открой редактор карточки и заполни поле Valetudo URL (например http://192.168.0.162).',
       option_rest_intro: 'Вариант 2 — добавь в configuration.yaml и перезагрузи Home Assistant:',
