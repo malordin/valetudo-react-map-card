@@ -297,7 +297,7 @@ export function ValetudoMapCanvas({
       if (entity.type !== 'path' && entity.type !== 'predicted_path') continue;
       ctx.beginPath();
       ctx.strokeStyle = entity.type === 'predicted_path' ? 'rgba(255,255,255,0.4)' : PATH_COLOR;
-      ctx.lineWidth = SCALE * 1.5;
+      ctx.lineWidth = SCALE * 0.75;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.setLineDash(entity.type === 'predicted_path' ? [4, 3] : []);

@@ -16274,7 +16274,7 @@ function $1({
       te.type === "wall" && Cr(M, te, q1, G.minX, G.minY);
     for (const te of o.entities)
       if (!(te.type !== "path" && te.type !== "predicted_path")) {
-        M.beginPath(), M.strokeStyle = te.type === "predicted_path" ? "rgba(255,255,255,0.4)" : Y1, M.lineWidth = _e * 1.5, M.lineCap = "round", M.lineJoin = "round", M.setLineDash(te.type === "predicted_path" ? [4, 3] : []);
+        M.beginPath(), M.strokeStyle = te.type === "predicted_path" ? "rgba(255,255,255,0.4)" : Y1, M.lineWidth = _e * 0.75, M.lineCap = "round", M.lineJoin = "round", M.setLineDash(te.type === "predicted_path" ? [4, 3] : []);
         for (let oe = 0; oe < te.points.length; oe += 2) {
           const de = (te.points[oe] / W - G.minX) * _e, ce = (te.points[oe + 1] / W - G.minY) * _e;
           oe === 0 ? M.moveTo(de, ce) : M.lineTo(de, ce);
