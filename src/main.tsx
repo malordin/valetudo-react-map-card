@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { DreameVacuumCard } from './components/DreameVacuumCard';
 import { ValetudoVacuumCard } from './components/ValetudoVacuumCard/ValetudoVacuumCard';
+import { ValetudoCardEditor } from './components/ValetudoCardEditor/ValetudoCardEditor';
 import type { Hass, HassConfig } from './types/homeassistant';
 import type { ValetudoHassConfig } from './types/valetudo';
 import { createMockHass } from './utils/mock';
@@ -193,9 +194,62 @@ class ValetudoVacuumMapCard extends HTMLElement {
       entity: 'vacuum.valetudo_yourrobot',
     };
   }
+
+  static getConfigElement() {
+    return document.createElement('valetudo-vacuum-map-card-editor');
+  }
 }
 
 customElements.define('valetudo-vacuum-map-card', ValetudoVacuumMapCard);
+
+// ─── Valetudo Card Editor element ──────────────────────────────────────────────
+
+class ValetudoVacuumMapCardEditor extends HTMLElement {
+  private _root: ReactDOM.Root | null = null;
+  private _hass?: Hass;
+  private _config?: ValetudoHassConfig;
+
+  set hass(hass: Hass) {
+    this._hass = hass;
+    this._render();
+  }
+
+  setConfig(config: ValetudoHassConfig) {
+    this._config = config;
+    this._render();
+  }
+
+  private _render() {
+    if (!this._hass || !this._config) return;
+
+    if (!this._root) {
+      this._root = ReactDOM.createRoot(this);
+    }
+
+    const hass = this._hass;
+    const config = this._config;
+
+    this._root.render(
+      <React.StrictMode>
+        <ValetudoCardEditor
+          hass={hass}
+          config={config}
+          onConfigChanged={(newConfig) => {
+            this.dispatchEvent(
+              new CustomEvent('config-changed', {
+                detail: { config: newConfig },
+                bubbles: true,
+                composed: true,
+              })
+            );
+          }}
+        />
+      </React.StrictMode>
+    );
+  }
+}
+
+customElements.define('valetudo-vacuum-map-card-editor', ValetudoVacuumMapCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
