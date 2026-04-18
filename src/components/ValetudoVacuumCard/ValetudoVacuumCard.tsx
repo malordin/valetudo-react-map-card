@@ -208,14 +208,23 @@ export function ValetudoVacuumCard({ hass, config }: ValetudoVacuumCardProps) {
       // 1. Direct REST via valetudo_url from config (works from HTTP pages)
       const robotUrl = resolvedRobotUrl;
       if (robotUrl) {
-        const res = await fetch(`${robotUrl}/api/v2/robot/capabilities/CombinedVirtualRestrictionsCapability`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error(`REST ${res.status}: ${await res.text()}`);
-        console.log('[valetudo] Saved via direct REST');
-        saved = true;
+        try {
+          const res = await fetch(`${robotUrl}/api/v2/robot/capabilities/CombinedVirtualRestrictionsCapability`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error(`REST ${res.status}: ${await res.text()}`);
+          console.log('[valetudo] Saved via direct REST');
+          saved = true;
+        } catch (fetchErr) {
+          if (fetchErr instanceof TypeError) {
+            // NetworkError / mixed content (HTTPS→HTTP) — fall through to rest_command
+            console.warn('[valetudo] Direct fetch failed (mixed content / network error), trying rest_command');
+          } else {
+            throw fetchErr;
+          }
+        }
       }
 
       // 2. HA rest_command (proxied on HA server — bypasses CORS/mixed-content)
