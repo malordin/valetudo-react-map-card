@@ -49,16 +49,15 @@ export function RestrictionsToolbar({
       </div>
 
       <div className="rt__actions">
-        {selectedId && (
-          <button
-            type="button"
-            className="rt__action-btn rt__action-btn--delete"
-            onClick={onDeleteSelected}
-            title={t('valetudo.restrictions.delete_selected')}
-          >
-            <Trash2 size={14} />
-          </button>
-        )}
+        <button
+          type="button"
+          className="rt__action-btn rt__action-btn--delete"
+          onClick={onDeleteSelected}
+          disabled={!selectedId}
+          title={t('valetudo.restrictions.delete_selected')}
+        >
+          <Trash2 size={14} />
+        </button>
         <button
           type="button"
           className={`rt__action-btn rt__action-btn--save${dirty ? ' rt__action-btn--save-dirty' : ''}`}

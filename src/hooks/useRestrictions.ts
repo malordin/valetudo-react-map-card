@@ -90,7 +90,7 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
       if (!mapDataReflectsSave) {
         // Camera still stale — keep showing saved snapshot
         setState((prev) => {
-          if (prev.dirty) return prev;
+          if (prev.dirty || prev.selectedId !== null) return prev;
           return { ...prev, walls: snap.walls, zones: snap.zones, selectedId: null, dirty: false };
         });
         return;
@@ -99,7 +99,7 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
       // Camera caught up — clear snapshot and remove optimistic savedDisplay
       savedSnapshotRef.current = null;
       setState((prev) => {
-        if (prev.dirty) return prev;
+        if (prev.dirty || prev.selectedId !== null) return prev;
         return {
           ...prev,
           walls: parsed.walls,
@@ -113,7 +113,7 @@ export function useRestrictions({ mapData, active }: UseRestrictionsOptions) {
     }
 
     setState((prev) => {
-      if (prev.dirty) return prev;
+      if (prev.dirty || prev.selectedId !== null) return prev;
       return { ...prev, walls: parsed.walls, zones: parsed.zones, selectedId: null, dirty: false };
     });
   }, [active, mapData]);

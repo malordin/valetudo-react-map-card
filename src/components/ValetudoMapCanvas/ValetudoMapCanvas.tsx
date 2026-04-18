@@ -426,8 +426,8 @@ export function ValetudoMapCanvas({
         ctx.stroke();
         ctx.setLineDash([]);
       }
-    } else {
-      // mode is 'room' | 'all' | 'zone' | undefined — draw server-side restrictions at reduced opacity
+    } else if (mode !== 'restrictions') {
+      // draw server-side restrictions at reduced opacity in non-edit modes
       for (const entity of mapData.entities) {
         if (entity.type === 'virtual_wall' && entity.points.length >= 4) {
           const x1 = (entity.points[0] / pixelSize - bb.minX) * SCALE;
