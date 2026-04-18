@@ -16131,7 +16131,7 @@ function V1({
         /* @__PURE__ */ r.jsxs("h2", { className: "header__title", children: [
           g,
           " ",
-          /* @__PURE__ */ r.jsx("span", { style: { fontSize: "0.6em", opacity: 0.45, fontWeight: 400 }, children: "v1.12.0" })
+          /* @__PURE__ */ r.jsx("span", { style: { fontSize: "0.6em", opacity: 0.45, fontWeight: 400 }, children: "v1.12.1" })
         ] }),
         /* @__PURE__ */ r.jsx("p", { className: "header__status", children: N })
       ] }),
