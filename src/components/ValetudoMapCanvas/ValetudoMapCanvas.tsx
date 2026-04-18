@@ -515,7 +515,7 @@ export function ValetudoMapCanvas({
         return;
       }
 
-      if (mode === 'restrictions' && restrictions && !isTouchDevice) {
+      if (mode === 'restrictions' && restrictions) {
         const tool = restrictions.tool;
         if (tool === 'wall' || tool === 'no_go' || tool === 'no_mop') {
           isDragging.current = true;
@@ -559,7 +559,7 @@ export function ValetudoMapCanvas({
         return;
       }
 
-      if (isDragging.current && mode === 'restrictions' && !isTouchDevice) {
+      if (isDragging.current && mode === 'restrictions') {
         setDragCurrent(screenToCanvas(e.clientX, e.clientY));
         return;
       }
@@ -603,7 +603,7 @@ export function ValetudoMapCanvas({
         return;
       }
 
-      if (isDragging.current && mode === 'restrictions' && restrictions && !isTouchDevice) {
+      if (isDragging.current && mode === 'restrictions' && restrictions) {
         isDragging.current = false;
         const end = screenToCanvas(e.clientX, e.clientY);
         if (dragStart && (Math.abs(end.x - dragStart.x) > 5 || Math.abs(end.y - dragStart.y) > 5)) {
